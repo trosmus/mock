@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import DashboardsPage from './pages/DashboardsPage';
 import SQLPage from './pages/SQLPage';
@@ -9,7 +9,7 @@ import CanvasPage from './pages/CanvasPage';
 
 function App() {
   return (
-    <Router basename="/mock">
+    <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboards" replace />} />
