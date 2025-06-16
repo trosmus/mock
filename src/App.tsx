@@ -9,7 +9,7 @@ import CanvasPage from './pages/CanvasPage';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/mock">
       <Layout>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboards" replace />} />
