@@ -38,7 +38,7 @@ interface AppState {
   setSidebarOpen: (open: boolean) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set) => ({
   // Initial state
   chatMessages: mockChatMessages,
   isLoading: false,

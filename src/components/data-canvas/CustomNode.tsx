@@ -679,7 +679,6 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
       <ActionBar
         nodeId={String(stableData.id || '')}
         status={nodeStatus}
-        nodeColor={nodeConfig.borderColor}
         onRun={handleRun}
         onConfigure={handleConfigure}
         onPreview={handlePreview}

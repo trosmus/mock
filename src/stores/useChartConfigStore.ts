@@ -49,7 +49,7 @@ const defaultConfig: ChartConfig = {
   limit: 100,
 };
 
-export const useChartConfigStore = create<ChartConfigState>((set, get) => ({
+export const useChartConfigStore = create<ChartConfigState>((set) => ({
   currentConfig: { ...defaultConfig },
   savedConfigs: [],
   

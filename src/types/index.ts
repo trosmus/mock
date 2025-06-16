@@ -1,5 +1,5 @@
 export interface ChartConfig {
-  type: 'bar' | 'line' | 'pie' | 'scatter' | 'table';
+  type: 'bar' | 'line' | 'pie' | 'scatter' | 'table' | 'area';
   x: string;
   y: string;
   groupBy?: string;

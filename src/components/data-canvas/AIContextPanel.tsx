@@ -6,8 +6,7 @@ const AIContextPanel: React.FC = () => {
   const { 
     selectedNodeId, 
     selectedEdgeId, 
-    insights, 
-    currentInsight,
+    insights,
     setCurrentInsight 
   } = useCanvasStore();
 

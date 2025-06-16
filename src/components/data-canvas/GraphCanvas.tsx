@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   useNodesState,
@@ -9,10 +8,8 @@ import {
   addEdge,
   BackgroundVariant,
   Position,
-  Handle,
-  getBezierPath,
 } from '@xyflow/react';
-import type { Node, Edge, Connection, NodeProps, EdgeProps } from '@xyflow/react';
+import type { Node, Edge, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
 import { useCanvasStore } from '../../state/canvasStore';
@@ -385,8 +382,6 @@ const GraphCanvas: React.FC = () => {
   console.log('🌐 GraphCanvas render');
 
   const {
-    selectedNodeId,
-    selectedEdgeId,
     setSelectedNode,
     setSelectedEdge,
     addInsight
@@ -469,7 +464,7 @@ const GraphCanvas: React.FC = () => {
 
     const handleEdgeConfigureEvent = (event: CustomEvent) => {
       console.log('⚙️ Edge configuration event:', event.detail);
-      const { edgeId, blockData, position } = event.detail;
+      const { edgeId, blockData } = event.detail;
       
       // Add insight about edge configuration
       addInsight({
@@ -492,24 +487,8 @@ const GraphCanvas: React.FC = () => {
     };
   }, [handleNodeCombination, addInsight]);
 
-  // Helper function to get icon based on block type
-  const getBlockIcon = (blockType: string) => {
-    console.log('🎭 getBlockIcon called for:', blockType);
-    switch (blockType) {
-      case 'dataset': return '🗃️';
-      case 'filter': return '🎯';
-      case 'field': return '🏷️';
-      case 'sql': return '💻';
-      case 'visualization': return '📊';
-      case 'narrative': return '📝';
-      case 'workflow': return '⚙️';
-      case 'data-series': return '📈';
-      default: return '📦';
-    }
-  };
-
   // Handle drag over for the canvas
-  const onDragOver = useCallback((event: React.DragEvent) => {
+  const handleCanvasDragOver = useCallback((event: React.DragEvent) => {
     console.log('🎯 onDragOver callback fired');
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
@@ -563,7 +542,7 @@ const GraphCanvas: React.FC = () => {
     }
   }, [setNodes, addInsight]);
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     console.log('🖱️ onNodeClick callback fired for:', node.id);
     console.log('Node clicked:', node.id);
     setSelectedNode(node.id);
@@ -575,7 +554,7 @@ const GraphCanvas: React.FC = () => {
     });
   }, [setSelectedNode, addInsight]);
 
-  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+  const onEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
     console.log('🖱️ onEdgeClick callback fired for:', edge.id);
     console.log('Edge clicked:', edge.id);
     setSelectedEdge(edge.id);
@@ -600,7 +579,7 @@ const GraphCanvas: React.FC = () => {
         position: 'relative',
         overflow: 'hidden',
       }}
-      onDragOver={onDragOver}
+      onDragOver={handleCanvasDragOver}
       onDrop={onDrop}
     >
       <ReactFlow

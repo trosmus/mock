@@ -6,10 +6,7 @@ import {
   PieChart, 
   ScatterChart,
   Table,
-  Plus,
-  Download,
-  Save,
-  Play
+  Plus
 } from 'lucide-react';
 import ChatAssistantPanel from '../components/ChatAssistantPanel';
 import VariablesPanel from '../components/VariablesPanel';
@@ -18,7 +15,6 @@ import ChartPreview from '../components/ChartPreview';
 import { useChartConfigStore } from '../stores/useChartConfigStore';
 import { useAppStore } from '../stores/useAppStore';
 import { useChatContextStore } from '../stores/useChatContextStore';
-import { mockQueryResults } from '../mocks/mockData';
 import type { Variable } from '../stores/useVariablesStore';
 import type { SavedDocument } from '../stores/useSavedDocumentsStore';
 
@@ -33,7 +29,6 @@ const VisualizationBuilderPage: React.FC = () => {
     setXAxis,
     setYAxis,
     setGroupBy,
-    saveConfig,
     resetConfig
   } = useChartConfigStore();
 

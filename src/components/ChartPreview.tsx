@@ -126,7 +126,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = React.memo(({
               type: 'bar',
               data: chartData.map(d => d.value),
               itemStyle: {
-                color: new URLSearchParams().toString ? '#5470c6' : '#5470c6',
+                color: '#5470c6',
                 borderRadius: [4, 4, 0, 0]
               }
             }]
@@ -171,8 +171,6 @@ const ChartPreview: React.FC<ChartPreviewProps> = React.memo(({
         };
 
       case 'line':
-        const lineData = data.data.map(row => [row[xIndex], row[yIndex]]);
-        
         return {
           title: {
             text: config.title,
@@ -502,8 +500,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = React.memo(({
         option={chartOption}
         style={{ height: '100%', width: '100%' }}
         opts={{ 
-          renderer: 'svg',
-          useDirtyRect: true
+          renderer: 'svg'
         }}
         notMerge={false}
         lazyUpdate={true}

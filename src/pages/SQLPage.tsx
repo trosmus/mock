@@ -13,7 +13,7 @@ import { BarChart3, Plus } from 'lucide-react';
 
 const SQLPage: React.FC = () => {
   const { addWidget } = useAppStore();
-  const { queryResult, currentSQL, setCurrentSQL } = useSQLStore();
+  const { queryResult, setCurrentSQL } = useSQLStore();
   const [showChart, setShowChart] = useState(false);
   const [chartConfig, setChartConfig] = useState<ChartConfig | null>(null);
   const [chatExpanded, setChatExpanded] = useState(false);
@@ -31,10 +31,10 @@ const SQLPage: React.FC = () => {
     
     // Auto-generate chart config based on result columns
     const columns = queryResult.columns;
-    const firstStringColumn = columns.find((col, index) => 
+    const firstStringColumn = columns.find((_col, index) => 
       typeof queryResult.data[0]?.[index] === 'string'
     );
-    const firstNumberColumn = columns.find((col, index) => 
+    const firstNumberColumn = columns.find((_col, index) => 
       typeof queryResult.data[0]?.[index] === 'number'
     );
 

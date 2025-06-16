@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Download, Save, Copy } from 'lucide-react';
+import { Play, Save, Copy } from 'lucide-react';
 import { useSQLStore } from '../stores/useSQLStore';
 
 interface SQLEditorProps {

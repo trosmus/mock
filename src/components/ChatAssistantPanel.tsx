@@ -81,7 +81,7 @@ const ChatAssistantPanel: React.FC<ChatAssistantPanelProps> = ({
         addContext({
           source: 'manual',
           sql: response.sql,
-          chartConfig: response.chartConfig,
+          chartConfig: response.chartConfig as any,
           description: input.trim()
         });
       }
@@ -104,7 +104,7 @@ const ChatAssistantPanel: React.FC<ChatAssistantPanelProps> = ({
     navigator.clipboard.writeText(sql);
   };
 
-  const handleRunSQL = (sql: string) => {
+  const handleRunSQL = () => {
     // This would integrate with SQL store
     navigate('/sql');
   };
@@ -272,7 +272,7 @@ const ChatAssistantPanel: React.FC<ChatAssistantPanelProps> = ({
                           <Copy size={10} />
                         </button>
                         <button
-                          onClick={() => handleRunSQL(message.sql!)}
+                          onClick={() => handleRunSQL()}
                           className="p-1 hover:bg-gray-800 rounded text-gray-400 hover:text-white"
                         >
                           <Play size={10} />

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, IconButton } from '@mui/material';
 import { X, Database, Filter, Hash, Code, BarChart3, FileText, Workflow } from 'lucide-react';
-import { useCanvasStore } from '../../state/canvasStore';
 import WidgetTile from './WidgetTile';
 import ExpandedWidgetView from './ExpandedWidgetView';
 import { getDemoDataForChart } from './mockData/chartDemoData';
@@ -214,7 +213,6 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ isOpen, nodeId, onClose, on
                       widget={widget} 
                       getDemoData={getDemoDataForChart}
                       onClick={() => handleWidgetClick(widget, index)}
-                      index={index}
                     />
                   </Box>
                 ))}

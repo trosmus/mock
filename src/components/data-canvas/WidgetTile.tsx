@@ -8,11 +8,10 @@ interface WidgetTileProps {
   widget: Widget;
   getDemoData?: (widgetId: string) => { columns: string[]; data: any[][]; totalRows: number; };
   onClick?: () => void;
-  index?: number;
 }
 
 // Compact widget tile for grid display
-const WidgetTile: React.FC<WidgetTileProps> = ({ widget, getDemoData, onClick, index }) => {
+const WidgetTile: React.FC<WidgetTileProps> = ({ widget, getDemoData, onClick }) => {
   const getWidgetIcon = () => {
     switch (widget.type) {
       case 'chart':

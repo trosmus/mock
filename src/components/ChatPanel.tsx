@@ -3,7 +3,6 @@ import { Send, Bot, User, Loader2, Copy, Play, BarChart3 } from 'lucide-react';
 import { useAppStore } from '../stores/useAppStore';
 import { mockAgentResponse } from '../mocks/mockData';
 import { useNavigate } from 'react-router-dom';
-import UseForQuickAnalysisButton from './UseForQuickAnalysisButton';
 
 interface ChatPanelProps {
   className?: string;

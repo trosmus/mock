@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Database, Clock, Activity, Users, BarChart3, FileText } from 'lucide-react';
+import { Database, Clock, Activity, Users, FileText } from 'lucide-react';
 import { useAppStore } from '../stores/useAppStore';
 
 const AdminPage: React.FC = () => {

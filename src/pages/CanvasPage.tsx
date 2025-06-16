@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import GraphCanvas from '../components/data-canvas/GraphCanvas';
-import AIContextPanel from '../components/data-canvas/AIContextPanel';
 import BlocksDrawer from '../components/data-canvas/BlocksDrawer';
 import PreviewModal from '../components/data-canvas/PreviewModal';
 import { useCanvasStore } from '../state/canvasStore';

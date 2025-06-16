@@ -22,7 +22,6 @@ const spinKeyframes = `
 interface ActionBarProps {
   nodeId: string;
   status: 'unsynced' | 'syncing' | 'synced' | 'error';
-  nodeColor: string;
   onRun: () => void;
   onConfigure: () => void;
   onPreview: () => void;
@@ -31,7 +30,6 @@ interface ActionBarProps {
 const ActionBar: React.FC<ActionBarProps> = ({
   nodeId,
   status,
-  nodeColor,
   onRun,
   onConfigure,
   onPreview

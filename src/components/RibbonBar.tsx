@@ -1,7 +1,6 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Plus, 
   BarChart3, 
   Type, 
   Heading1, 
@@ -16,7 +15,6 @@ import { useChatContextStore } from '../stores/useChatContextStore';
 
 const RibbonBar: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { addWidget } = useAppStore();
   const { addContext } = useChatContextStore();
 

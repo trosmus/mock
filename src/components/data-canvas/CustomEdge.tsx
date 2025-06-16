@@ -3,7 +3,6 @@ import { getBezierPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import { useCanvasStore } from '../../state/canvasStore';
 import { Plus, Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp } from 'lucide-react';
-import ActionBar from './ActionBar';
 
 // Helper function to get icon for block type
 const getBlockIcon = (blockType: string) => {
@@ -53,9 +52,6 @@ const CustomEdge: React.FC<EdgeProps> = ({
   const [droppedBlocks, setDroppedBlocks] = useState<any[]>(
     Array.isArray(data?.transformationBlocks) ? data.transformationBlocks : []
   );
-  const [showActionBar, setShowActionBar] = useState(false);
-  // const [showActionBar, setShowActionBar] = useState(false);
-  const [edgeStatus, setEdgeStatus] = useState<'unsynced' | 'syncing' | 'synced' | 'error'>('unsynced');
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -117,29 +113,6 @@ const CustomEdge: React.FC<EdgeProps> = ({
       console.error('Failed to parse dropped block on edge:', error);
     }
   }, [id, labelX, labelY]);
-
-  // Action button handlers
-  const handleRun = () => {
-    console.log('🏃 handleRun called for edge:', id);
-    setEdgeStatus('syncing');
-    console.log('Running edge transformations:', id);
-    // Simulate async operation
-    setTimeout(() => {
-      setEdgeStatus('synced');
-    }, 2000);
-  };
-
-  const handleConfigure = () => {
-    console.log('⚙️ handleConfigure called for edge:', id);
-    console.log('Configuring edge transformations:', id);
-    // Open configuration panel
-  };
-
-  const handlePreview = () => {
-    console.log('👁️ handlePreview called for edge:', id);
-    console.log('Previewing edge transformations:', id);
-    // Open preview modal
-  };
 
   const edgeStyle = {
     stroke: isDragOver ? '#10b981' : (style.stroke || '#3b82f6'),
@@ -244,8 +217,8 @@ const CustomEdge: React.FC<EdgeProps> = ({
       {droppedBlocks.length > 0 && (
         <g
           style={{ pointerEvents: 'all' }}
-          onMouseEnter={() => setShowActionBar(true)}
-          onMouseLeave={() => setShowActionBar(false)}
+          onMouseEnter={() => setIsDragOver(true)}
+          onMouseLeave={() => setIsDragOver(false)}
         >
           {/* Background box */}
           <rect
@@ -278,27 +251,6 @@ const CustomEdge: React.FC<EdgeProps> = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            {/* {true && (
-              // {showActionBar && (
-              <foreignObject
-                x={labelX - 15}
-                y={labelY - boxHeight / 2 - 120}
-                width="30"
-                height="100"
-                style={{ pointerEvents: 'all' }}
-              >
-                <div style={{ position: 'absolute', width: '30px', height: '100px' }}>
-                  <ActionBar
-                    nodeId={id}
-                    status={edgeStatus}
-                    nodeColor={edgeStyle.stroke}
-                    onRun={handleRun}
-                    onConfigure={handleConfigure}
-                    onPreview={handlePreview}
-                  />
-                </div>
-              </foreignObject>
-            )} */}
             <div
               style={{
                 display: 'grid',
@@ -310,7 +262,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
                 padding: `${boxPadding / 2}px`,
               }}
             >
-              {Array.from({ length: gridDims.cols * gridDims.rows }).map((_, index): React.ReactNode => {
+              {Array.from({ length: gridDims.cols * gridDims.rows }).map((_, index) => {
                 const block = droppedBlocks[index];
 
                 if (block) {
