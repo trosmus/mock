@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import GraphCanvas from '../components/data-canvas/GraphCanvas';
 import BlocksDrawer from '../components/data-canvas/BlocksDrawer';
+import AgentsBar from '../components/data-canvas/AgentsBar';
 import PreviewModal from '../components/data-canvas/PreviewModal';
 import { useCanvasStore } from '../state/canvasStore';
 
@@ -65,14 +66,19 @@ const CanvasPage: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Blocks Drawer - Left Sidebar */}
-        <BlocksDrawer dataSeries={dataSeries} />
-        
-        {/* Graph Canvas - Main Area */}
-        <main className="flex-1 relative bg-white">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Graph Canvas - Main Area (full width) */}
+        <main className="flex-1 relative bg-white overflow-hidden">
           <GraphCanvas />
+          
+          {/* Blocks Drawer - Left Overlay with full height */}
+          <div className="absolute left-0 top-0 bottom-0 z-10">
+            <BlocksDrawer dataSeries={dataSeries} />
+          </div>
         </main>
+
+        {/* Agents Bar - Right Sidebar */}
+        <AgentsBar />
 
         {/*/!* AI Context Panel - Right Sidebar *!/*/}
         {/*<aside className="w-80 border-l border-gray-200 bg-white shadow-sm">*/}

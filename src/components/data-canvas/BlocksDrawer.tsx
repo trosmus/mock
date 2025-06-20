@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, PanelLeft, Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PanelLeft, Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp, File } from 'lucide-react';
+import { useCanvasStore } from '../../state/canvasStore';
 
 interface Block {
   id: string;
@@ -145,36 +146,96 @@ const blockCategories: BlockCategory[] = [
   },
 ];
 
+// Helper function to get category-specific file colors and icons
+const getCategoryFileConfig = (type: string) => {
+  switch (type) {
+    case 'dataset':
+      return {
+        icon: Database,
+        color: '#3b82f6',
+        fileColor: '#4a90e2',
+        extension: 'DATA'
+      };
+    case 'filter':
+      return {
+        icon: Filter,
+        color: '#10b981',
+        fileColor: '#50c878',
+        extension: 'FLT'
+      };
+    case 'field':
+      return {
+        icon: Hash,
+        color: '#f59e0b',
+        fileColor: '#ffa500',
+        extension: 'FLD'
+      };
+    case 'sql':
+      return {
+        icon: Code,
+        color: '#6366f1',
+        fileColor: '#7c3aed',
+        extension: 'SQL'
+      };
+    case 'visualization':
+      return {
+        icon: BarChart3,
+        color: '#ec4899',
+        fileColor: '#e91e63',
+        extension: 'VIZ'
+      };
+    case 'narrative':
+      return {
+        icon: FileText,
+        color: '#22c55e',
+        fileColor: '#4caf50',
+        extension: 'TXT'
+      };
+    case 'workflow':
+      return {
+        icon: Workflow,
+        color: '#ef4444',
+        fileColor: '#f44336',
+        extension: 'WFL'
+      };
+    case 'data-series':
+      return {
+        icon: TrendingUp,
+        color: '#0ea5e9',
+        fileColor: '#2196f3',
+        extension: 'DAT'
+      };
+    default:
+      return {
+        icon: File,
+        color: '#64748b',
+        fileColor: '#9e9e9e',
+        extension: 'FILE'
+      };
+  }
+};
+
 const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { isDrawerExpanded, setDrawerExpanded } = useCanvasStore();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
-  // Auto-expand data series category when new series are added
-  useEffect(() => {
-    if (dataSeries.length > 0) {
-      setExpandedCategories(prev => new Set([...prev, 'data-series']));
+  // Add data series to the categories if any exist
+  const blockCategoriesWithSeries = [...blockCategories];
+  if (dataSeries.length > 0) {
+    const existingDataSeriesCategory = blockCategoriesWithSeries.find(cat => cat.id === 'data-series');
+    if (existingDataSeriesCategory) {
+      // Add data series as blocks to the existing category
+      const dataSeriesBlocks: Block[] = dataSeries.map(series => ({
+        id: series.id,
+        name: series.name,
+        description: `Data series from ${series.sourceWidget}`,
+        prompt: `Analyze this ${series.chartType} data series: ${series.name}. Examine patterns, trends, and insights from the ${series.sourceWidget} visualization.`,
+        type: 'data-series'
+      }));
+      
+      existingDataSeriesCategory.blocks = [...existingDataSeriesCategory.blocks, ...dataSeriesBlocks];
     }
-  }, [dataSeries.length]);
-
-  // Convert data series to blocks
-  const dataSeriesBlocks: Block[] = dataSeries.map(series => ({
-    id: series.id,
-    name: `${series.name} (${series.chartType})`,
-    description: `Data series from ${series.sourceWidget}`,
-    prompt: `Data series from ${series.sourceWidget}: ${series.name}`,
-    type: 'data-series'
-  }));
-
-  // Update the blockCategories to use dynamic data series
-  const blockCategoriesWithSeries: BlockCategory[] = [
-    ...blockCategories.slice(1), // All categories except the placeholder data-series
-    {
-      id: 'data-series',
-      name: 'Data Series',
-      icon: <TrendingUp className="w-4 h-4" />,
-      blocks: dataSeriesBlocks
-    }
-  ];
+  }
 
   const toggleCategory = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -191,98 +252,221 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
     event.dataTransfer.effectAllowed = 'copy';
   };
 
-  if (!isExpanded) {
-    return (
-      <div className="w-12 bg-white border-r border-gray-200 flex flex-col">
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="p-3 hover:bg-gray-50 transition-colors border-none outline-none focus:outline-none"
-          title="Expand Drawer"
-        >
-          <PanelLeft size={20} className="text-gray-600" />
-        </button>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="transform -rotate-90 text-xs text-gray-500 whitespace-nowrap">
-            Drawer
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <PanelLeft size={16} className="text-gray-700" />
-            <h3 className="font-semibold text-gray-900 text-sm">Drawer</h3>
-          </div>
+    <div 
+      className={`bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg ${
+        isDrawerExpanded ? 'w-80' : 'w-12'
+      }`}
+    >
+      {!isDrawerExpanded ? (
+        <>
           <button
-            onClick={() => setIsExpanded(false)}
-            className="p-1 hover:bg-gray-100 transition-colors border-none outline-none focus:outline-none"
-            title="Collapse Panel"
+            onClick={() => setDrawerExpanded(true)}
+            className="p-3 hover:bg-gray-50 transition-colors border-none outline-none focus:outline-none"
+            title="Expand Drawer"
           >
-            <ChevronLeft size={16} className="text-gray-500" />
+            <PanelLeft size={20} className="text-gray-600" />
           </button>
-        </div>
-      </div>
-
-      {/* Categories */}
-      <div className="flex-1 overflow-y-auto">
-        {blockCategoriesWithSeries.map((category) => (
-          <div key={category.id} className="border-b border-gray-100">
-            <button
-              onClick={() => toggleCategory(category.id)}
-              className={`w-full p-3 flex items-center justify-between transition-colors border-none outline-none focus:outline-none ${
-                expandedCategories.has(category.id) 
-                  ? 'bg-blue-50 hover:bg-blue-100' 
-                  : 'hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                {category.icon}
-                <span className="text-sm font-medium text-gray-700">{category.name}</span>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="transform -rotate-90 text-xs text-gray-500 whitespace-nowrap">
+              Drawer
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PanelLeft size={16} className="text-gray-700" />
+                <h3 className="font-semibold text-gray-900 text-sm">Drawer</h3>
               </div>
-              <ChevronRight 
-                className={`w-4 h-4 text-gray-400 transition-transform ${
-                  expandedCategories.has(category.id) ? 'rotate-90' : ''
-                }`} 
-              />
-            </button>
+              <button
+                onClick={() => setDrawerExpanded(false)}
+                className="p-1 hover:bg-gray-100 transition-colors border-none outline-none focus:outline-none"
+                title="Collapse Panel"
+              >
+                <ChevronLeft size={16} className="text-gray-500" />
+              </button>
+            </div>
+          </div>
 
-            {expandedCategories.has(category.id) && (
-              <div className="pb-2">
-                {category.blocks.map((block) => (
-                  <div
-                    key={block.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, block)}
-                    className="mx-3 mb-2 p-2 bg-gray-50 rounded-lg border border-gray-200 cursor-grab hover:bg-gray-100 hover:border-blue-300 transition-colors"
-                  >
-                    <div className="text-xs font-medium text-gray-800 mb-1">
-                      {block.name}
-                    </div>
-                    <div className="text-xs text-gray-600 leading-relaxed">
-                      {block.description}
+          {/* Categories */}
+          <div className="flex-1 overflow-y-auto">
+            {blockCategoriesWithSeries.map((category) => (
+              <div key={category.id} className="border-b border-gray-100">
+                <button
+                  onClick={() => toggleCategory(category.id)}
+                  className={`w-full p-3 flex items-center justify-between transition-colors border-none outline-none focus:outline-none ${
+                    expandedCategories.has(category.id) 
+                      ? 'bg-blue-50 hover:bg-blue-100' 
+                      : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    {category.icon}
+                    <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                  </div>
+                  <ChevronRight
+                    className={`w-4 h-4 text-gray-400 transition-transform ${
+                      expandedCategories.has(category.id) ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+
+                {expandedCategories.has(category.id) && (
+                  <div className="pb-3 px-3">
+                    {/* Grid container for files */}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+                        gap: '12px',
+                        justifyItems: 'center',
+                      }}
+                    >
+                      {category.blocks.map((block) => {
+                        const fileConfig = getCategoryFileConfig(block.type);
+                        const IconComponent = fileConfig.icon;
+
+                        return (
+                          <div
+                            key={block.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, block)}
+                            className="cursor-grab hover:scale-[1.05] transition-all duration-200"
+                            style={{
+                              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+                              width: '80px',
+                              textAlign: 'center',
+                            }}
+                          >
+                            {/* File Icon with Document Style */}
+                            <div
+                              style={{
+                                position: 'relative',
+                                width: '32px',
+                                height: '40px',
+                                margin: '20px auto 20px auto',
+                              }}
+                            >
+                              {/* Main document body */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  width: '32px',
+                                  height: '40px',
+                                  background: `linear-gradient(135deg, ${fileConfig.fileColor} 0%, ${fileConfig.fileColor}dd 100%)`,
+                                  borderRadius: '3px',
+                                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2)',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                }}
+                              />
+
+                              {/* Folded corner */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '0',
+                                  right: '0',
+                                  width: '8px',
+                                  height: '8px',
+                                  background: `linear-gradient(225deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%)`,
+                                  clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+                                  borderBottomLeftRadius: '2px',
+                                }}
+                              />
+
+                              {/* Small category icon overlay */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '3px',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  width: '14px',
+                                  height: '14px',
+                                  background: 'rgba(255, 255, 255, 0.9)',
+                                  borderRadius: '2px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+                                }}
+                              >
+                                <IconComponent
+                                  size={8}
+                                  color={fileConfig.fileColor}
+                                  strokeWidth={2.5}
+                                />
+                              </div>
+
+                              {/* File extension badge */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '-6px',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  fontSize: '7px',
+                                  fontWeight: '700',
+                                  color: '#666',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                  padding: '1px 3px',
+                                  borderRadius: '2px',
+                                  border: '0.5px solid #ccc',
+                                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                                  letterSpacing: '0.3px',
+                                }}
+                              >
+                                {fileConfig.extension}
+                              </div>
+                            </div>
+
+                            {/* File Name */}
+                            <div
+                              style={{
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                color: '#1d1d1f',
+                                lineHeight: '1.2',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                marginBottom: '2px',
+                                width: '100%',
+                              }}
+                              title={block.name.replace(' Block', '')}
+                            >
+                              {block.name.replace(' Block', '').replace(/\s+/g, '_')}
+                            </div>
+
+                            {/* File Type */}
+                            <div
+                              style={{
+                                fontSize: '8px',
+                                color: '#a1a1a6',
+                                fontWeight: '400',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px',
+                              }}
+                            >
+                              {block.type.replace('-', ' ')}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="p-3 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          {blockCategoriesWithSeries.reduce((total, cat) => total + cat.blocks.length, 0)} blocks available
-        </p>
-      </div>
+        </>
+      )}
     </div>
   );
 };
 
-export default BlocksDrawer; 
+export default BlocksDrawer;

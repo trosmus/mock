@@ -76,7 +76,7 @@ const TabNavigation: React.FC = () => {
           { icon: Save, label: 'Save Layout', description: 'Save current graph layout' },
           { icon: Download, label: 'Export', description: 'Export graph as image' },
           { icon: Search, label: 'Find Node', description: 'Search for specific nodes' },
-          { icon: Filter, label: 'Filter', description: 'Filter nodes and edges' },
+          { icon: Filter, label: 'Filter', description: 'Filter and organize nodes' },
         ];
       default:
         return [];

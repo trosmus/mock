@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import React, { useState, useMemo } from 'react';
+import { Handle, Position, NodeResizer } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp } from 'lucide-react';
+import { Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp, Folder, FolderOpen, Play, Settings, Eye, X, Minus } from 'lucide-react';
 import { useCanvasStore } from '../../state/canvasStore';
-import ActionBar from './ActionBar';
 import { 
   TextField, 
   Button, 
@@ -19,65 +18,56 @@ const getCategoryConfigByType = (type: string) => {
     case 'dataset':
       return {
         icon: Database,
-        bgColor: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-        borderColor: '#3b82f6',
-        iconColor: '#1e40af'
+        folderColor: '#3b82f6',
+        accentColor: '#1e40af'
       };
     case 'filter':
       return {
         icon: Filter,
-        bgColor: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
-        borderColor: '#10b981',
-        iconColor: '#047857'
+        folderColor: '#10b981',
+        accentColor: '#047857'
       };
     case 'field':
       return {
         icon: Hash,
-        bgColor: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-        borderColor: '#f59e0b',
-        iconColor: '#d97706'
+        folderColor: '#f59e0b',
+        accentColor: '#d97706'
       };
     case 'sql':
       return {
         icon: Code,
-        bgColor: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)',
-        borderColor: '#6366f1',
-        iconColor: '#4338ca'
+        folderColor: '#6366f1',
+        accentColor: '#4338ca'
       };
     case 'visualization':
       return {
         icon: BarChart3,
-        bgColor: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)',
-        borderColor: '#ec4899',
-        iconColor: '#be185d'
+        folderColor: '#ec4899',
+        accentColor: '#be185d'
       };
     case 'narrative':
       return {
         icon: FileText,
-        bgColor: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-        borderColor: '#22c55e',
-        iconColor: '#15803d'
+        folderColor: '#22c55e',
+        accentColor: '#15803d'
       };
     case 'workflow':
       return {
         icon: Workflow,
-        bgColor: 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)',
-        borderColor: '#ef4444',
-        iconColor: '#dc2626'
+        folderColor: '#ef4444',
+        accentColor: '#dc2626'
       };
     case 'data-series':
       return {
         icon: TrendingUp,
-        bgColor: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-        borderColor: '#0ea5e9',
-        iconColor: '#0284c7'
+        folderColor: '#0ea5e9',
+        accentColor: '#0284c7'
       };
     default:
       return {
         icon: Database,
-        bgColor: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-        borderColor: '#64748b',
-        iconColor: '#475569'
+        folderColor: '#64748b',
+        accentColor: '#475569'
       };
   }
 };
@@ -86,7 +76,7 @@ const getCategoryConfigByType = (type: string) => {
 const blendHexColors = (colors: string[]): string => {
   if (colors.length === 0) return '#64748b';
   if (colors.length === 1) return colors[0];
-  
+
   // Convert hex to RGB
   const rgbColors = colors.map(hex => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -94,83 +84,179 @@ const blendHexColors = (colors: string[]): string => {
     const b = parseInt(hex.slice(5, 7), 16);
     return { r, g, b };
   });
-  
+
   // Average the RGB values
   const avgR = Math.round(rgbColors.reduce((sum, color) => sum + color.r, 0) / rgbColors.length);
   const avgG = Math.round(rgbColors.reduce((sum, color) => sum + color.g, 0) / rgbColors.length);
   const avgB = Math.round(rgbColors.reduce((sum, color) => sum + color.b, 0) / rgbColors.length);
-  
+
   // Convert back to hex
   const toHex = (n: number) => n.toString(16).padStart(2, '0');
   return `#${toHex(avgR)}${toHex(avgG)}${toHex(avgB)}`;
 };
 
-// Shimmer animation keyframes
-const shimmerKeyframes = `
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+// Helper function to get file-specific config for content display
+const getFileConfig = (type: string) => {
+  switch (type) {
+    case 'dataset':
+      return {
+        icon: Database,
+        fileColor: '#4a90e2',
+        extension: 'DATA'
+      };
+    case 'filter':
+      return {
+        icon: Filter,
+        fileColor: '#50c878',
+        extension: 'FLT'
+      };
+    case 'field':
+      return {
+        icon: Hash,
+        fileColor: '#ffa500',
+        extension: 'FLD'
+      };
+    case 'sql':
+      return {
+        icon: Code,
+        fileColor: '#7c3aed',
+        extension: 'SQL'
+      };
+    case 'visualization':
+      return {
+        icon: BarChart3,
+        fileColor: '#e91e63',
+        extension: 'VIZ'
+      };
+    case 'narrative':
+      return {
+        icon: FileText,
+        fileColor: '#4caf50',
+        extension: 'TXT'
+      };
+    case 'workflow':
+      return {
+        icon: Workflow,
+        fileColor: '#f44336',
+        extension: 'WFL'
+      };
+    case 'data-series':
+      return {
+        icon: TrendingUp,
+        fileColor: '#2196f3',
+        extension: 'DAT'
+      };
+    default:
+      return {
+        icon: Database,
+        fileColor: '#9e9e9e',
+        extension: 'FILE'
+      };
   }
-  
-  @keyframes shimmerBorder {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-  
-  .shimmer-border {
-    position: relative;
-  }
-  
-  .shimmer-border::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
-    background-size: 200% 100%;
-    border-radius: 19px;
-    animation: shimmerBorder 2s ease-in-out infinite;
-    z-index: -1;
-  }
-  
-  .shimmer-outline {
-    position: relative;
-  }
-  
-  .shimmer-outline::after {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
-    background-size: 200% 100%;
-    border-radius: 26px;
-    animation: shimmerBorder 2s ease-in-out infinite;
-    z-index: -2;
-  }
-`;
+};
+
+// Helper function to create file icon component
+const createFileIcon = (type: string, name: string, size: 'small' | 'large' = 'small') => {
+  const fileConfig = getFileConfig(type);
+  const IconComponent = fileConfig.icon;
+  const isSmall = size === 'small';
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: isSmall ? '20px' : '32px',
+        height: isSmall ? '25px' : '40px',
+        margin: isSmall ? '0 auto 4px auto' : '0 auto 8px auto',
+      }}
+      title={name}
+    >
+      {/* Main document body */}
+      <div
+        style={{
+          position: 'absolute',
+          width: isSmall ? '20px' : '32px',
+          height: isSmall ? '25px' : '40px',
+          background: `linear-gradient(135deg, ${fileConfig.fileColor} 0%, ${fileConfig.fileColor}dd 100%)`,
+          borderRadius: isSmall ? '2px' : '3px',
+          boxShadow: isSmall
+            ? '0 1px 4px rgba(0, 0, 0, 0.15), 0 0.5px 2px rgba(0, 0, 0, 0.2)'
+            : '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+        }}
+      />
+
+      {/* Folded corner */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: isSmall ? '5px' : '8px',
+          height: isSmall ? '5px' : '8px',
+          background: `linear-gradient(225deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%)`,
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+          borderBottomLeftRadius: isSmall ? '1px' : '2px',
+        }}
+      />
+
+      {/* Small category icon overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: isSmall ? '2px' : '3px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: isSmall ? '8px' : '14px',
+          height: isSmall ? '8px' : '14px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: isSmall ? '1px' : '2px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <IconComponent
+          size={isSmall ? 4 : 8}
+          color={fileConfig.fileColor}
+          strokeWidth={2.5}
+        />
+      </div>
+
+      {/* File extension badge */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: isSmall ? '-4px' : '-6px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: isSmall ? '5px' : '7px',
+          fontWeight: '700',
+          color: '#666',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: isSmall ? '0.5px 2px' : '1px 3px',
+          borderRadius: '2px',
+          border: '0.5px solid #ccc',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+          letterSpacing: '0.3px',
+        }}
+      >
+        {fileConfig.extension}
+      </div>
+    </div>
+  );
+};
 
 const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
   console.log(`🔄 [${data.id}] CustomNode render - selected: ${selected}, dataChanged: ${!!data}`);
-  
+
   const currentNodeId = String(data.id || '');
-  
+
   // Use a selector to only re-render when this specific node's selection state changes
   const isSelectedFromStore = useCanvasStore((state) => state.selectedNodeId === currentNodeId);
   const isSelected = selected || isSelectedFromStore;
-  
+
   // Stabilize the data object to prevent unnecessary re-renders
   const stableData = useMemo(() => {
     return {
@@ -180,43 +266,36 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
       prompt: data.prompt || data.description || "Analyze the healthcare data to identify key patterns and insights. Focus on patient demographics, condition prevalence, and care utilization trends.",
       blockType: data.blockType,
       category: data.category,
-      combinedBlocks: data.combinedBlocks
+      combinedBlocks: data.combinedBlocks,
+      isAgent: data.isAgent || false
     };
-  }, [data.id, data.label, data.description, data.prompt, data.blockType, data.category, data.combinedBlocks]);
-  
+  }, [data.id, data.label, data.description, data.prompt, data.blockType, data.category, data.combinedBlocks, data.isAgent]);
+
   // Node status state (you can move this to your store later)
   const [nodeStatus, setNodeStatus] = useState<'unsynced' | 'syncing' | 'synced' | 'error'>('unsynced');
   const [showConfigPopover, setShowConfigPopover] = useState(false);
-
-  // Inject shimmer styles only once
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const styleElement = document.createElement('style');
-      styleElement.textContent = shimmerKeyframes;
-      styleElement.id = 'shimmer-styles';
-      
-      // Only add if not already present
-      if (!document.getElementById('shimmer-styles')) {
-        document.head.appendChild(styleElement);
-      }
-      
-      return () => {
-        const existingStyle = document.getElementById('shimmer-styles');
-        if (existingStyle) {
-          document.head.removeChild(existingStyle);
-        }
-      };
-    }
-  }, []);
 
   // Action button handlers
   const handleRun = () => {
     console.log('🏃 handleRun called for:', data.id);
     setNodeStatus('syncing');
     console.log('Running node:', data.id);
-    // Simulate async operation
+    
+    // Add insight about starting the run
+    const { addInsight } = useCanvasStore.getState();
+    addInsight({
+      content: `Started processing ${stableData.label}. The node will turn to its category color once syncing is complete.`,
+      nodeId: String(data.id)
+    });
+    
+    // Simulate async operation with proper status progression
     setTimeout(() => {
       setNodeStatus('synced');
+      // Add insight about completion
+      addInsight({
+        content: `Successfully synced ${stableData.label}. The node is now ready and displays its category color.`,
+        nodeId: String(data.id)
+      });
     }, 2000);
   };
 
@@ -228,7 +307,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
   const handlePreview = () => {
     console.log('👁️ handlePreview called for:', data.id);
     console.log('👁️ Current nodeStatus:', nodeStatus);
-    
+
     console.log('👁️ Opening preview modal for node:', data.id);
     console.log('👁️ Store state before opening:', useCanvasStore.getState());
     const { openPreviewModal } = useCanvasStore.getState();
@@ -236,6 +315,24 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
     openPreviewModal(String(data.id));
     console.log('👁️ Store state after opening:', useCanvasStore.getState());
     console.log('👁️ Modal nodeId after opening:', useCanvasStore.getState().previewModalNodeId);
+  };
+
+  const handleMinimize = () => {
+    console.log('📦 handleMinimize called for:', data.id);
+    // Dispatch custom event to handle minimization in GraphCanvas
+    const minimizeEvent = new CustomEvent('minimizeNode', {
+      detail: { nodeId: String(data.id) }
+    });
+    window.dispatchEvent(minimizeEvent);
+  };
+
+  const handleClose = () => {
+    console.log('❌ handleClose called for:', data.id);
+    // Dispatch custom event to handle removal in GraphCanvas
+    const removeEvent = new CustomEvent('removeNode', {
+      detail: { nodeId: String(data.id) }
+    });
+    window.dispatchEvent(removeEvent);
   };
 
   // Memoize category config to prevent recalculation on every render
@@ -276,7 +373,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
 
   // Check if this is a combined node
   const isCombined = Array.isArray(stableData.combinedBlocks) && (stableData.combinedBlocks as any[]).length > 0;
-  
+
   // Memoize combinedBlocks to prevent array recreation
   const combinedBlocks = useMemo(() => {
     return (stableData.combinedBlocks as any[]) || [];
@@ -286,403 +383,917 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
   const blendColors = useMemo(() => {
     console.log(`🎨 [${currentNodeId}] blendColors memoization recalculated - isCombined: ${isCombined}, combinedBlocksLength: ${combinedBlocks.length}`);
     if (!isCombined || combinedBlocks.length === 0) return getCategoryConfig;
-    
+
     // Get all block types including the original
     const allBlockTypes = [
       String(stableData.blockType || stableData.category || 'default'),
       ...combinedBlocks.map((block: any) => String(block.type || 'default'))
     ];
-    
+
     // Get all category configs
     const configs = allBlockTypes.map(type => {
       switch (type) {
-        case 'dataset': return { borderColor: '#3b82f6' };
-        case 'filter': return { borderColor: '#10b981' };
-        case 'field': return { borderColor: '#f59e0b' };
-        case 'sql': return { borderColor: '#6366f1' };
-        case 'visualization': return { borderColor: '#ec4899' };
-        case 'narrative': return { borderColor: '#22c55e' };
-        case 'workflow': return { borderColor: '#ef4444' };
-        default: return { borderColor: '#64748b' };
+        case 'dataset': return { folderColor: '#3b82f6' };
+        case 'filter': return { folderColor: '#10b981' };
+        case 'field': return { folderColor: '#f59e0b' };
+        case 'sql': return { folderColor: '#6366f1' };
+        case 'visualization': return { folderColor: '#ec4899' };
+        case 'narrative': return { folderColor: '#22c55e' };
+        case 'workflow': return { folderColor: '#ef4444' };
+        default: return { folderColor: '#64748b' };
       }
     });
-    
-    // Extract hex colors from border colors
-    const hexColors = configs.map(config => config.borderColor);
-    
+
+    // Extract hex colors from folder colors
+    const hexColors = configs.map(config => config.folderColor);
+
     // Blend the colors
     const blendedColor = blendHexColors(hexColors);
-    
+
     return {
       icon: getCategoryConfig.icon, // Keep original icon
-      bgColor: `linear-gradient(135deg, ${blendedColor}20 0%, ${blendedColor}40 100%)`,
-      borderColor: blendedColor,
-      iconColor: blendedColor
+      folderColor: blendedColor,
+      accentColor: blendedColor
     };
   }, [isCombined, combinedBlocks, getCategoryConfig, stableData.blockType, stableData.category, currentNodeId]);
 
-  // Get the appropriate config (blended for combined, original for single)
+  // Get the appropriate config (blended for combined, original for single) with sync status
   const nodeConfig = useMemo(() => {
     console.log(`⚙️ [${currentNodeId}] nodeConfig memoization recalculated`);
-    return isCombined ? blendColors : getCategoryConfig;
-  }, [isCombined, blendColors, getCategoryConfig, currentNodeId]);
+    const baseConfig = isCombined ? blendColors : getCategoryConfig;
+    
+    // If node is not synced, use grey colors
+    if (nodeStatus === 'unsynced') {
+      return {
+        icon: baseConfig.icon,
+        folderColor: '#9ca3af', // Grey color for unsynced
+        accentColor: '#6b7280'
+      };
+    }
+    
+    // If syncing, use a slightly darker grey
+    if (nodeStatus === 'syncing') {
+      return {
+        icon: baseConfig.icon,
+        folderColor: '#6b7280', // Darker grey for syncing
+        accentColor: '#4b5563'
+      };
+    }
+    
+    // If synced or error, use the original colors
+    return baseConfig;
+  }, [isCombined, blendColors, getCategoryConfig, currentNodeId, nodeStatus]);
 
-  // Memoize grid calculations
-  const gridCalculations = useMemo(() => {
-    const totalBlocks = isCombined ? 1 + combinedBlocks.length : 1;
-    console.log(`📐 [${currentNodeId}] calculateGridDimensions called with: ${totalBlocks}`);
-    
-    let gridDims;
-    if (totalBlocks <= 1) gridDims = { cols: 1, rows: 1, maxBlocks: 1 };
-    else if (totalBlocks <= 4) gridDims = { cols: 2, rows: 2, maxBlocks: 4 };
-    else if (totalBlocks <= 9) gridDims = { cols: 3, rows: 3, maxBlocks: 9 };
-    else if (totalBlocks <= 16) gridDims = { cols: 4, rows: 4, maxBlocks: 16 };
-    else gridDims = { cols: 4, rows: 4, maxBlocks: 16 }; // Cap at 4x4 for readability
-    
-    console.log(`📦 [${currentNodeId}] getCellSize called with: {cols: ${gridDims.cols}, rows: ${gridDims.rows}}`);
-    const baseWidth = 120;
-    const baseHeight = 80;
-    const gap = 4;
-    
-    const cellWidth = Math.floor((baseWidth - (gridDims.cols - 1) * gap) / gridDims.cols);
-    const cellHeight = Math.floor((baseHeight - (gridDims.rows - 1) * gap) / gridDims.rows);
-    
-    const cellSize = {
-      width: cellWidth,
-      height: cellHeight,
-      containerWidth: baseWidth,
-      containerHeight: baseHeight
-    };
-    
-    return { totalBlocks, gridDims, cellSize };
-  }, [isCombined, combinedBlocks.length, currentNodeId]);
-
-  const { totalBlocks, gridDims, cellSize } = gridCalculations;
-
-  // Memoize the complex blocks rendering logic
-  const renderedBlocks = useMemo(() => {
-    console.log(`🧱 [${currentNodeId}] renderedBlocks memoization recalculated`);
-    if (!isCombined) return null;
-    
-    const allBlocks = [
-      {
-        name: String(stableData.label || '').replace(' Block', ''),
-        type: stableData.blockType,
-        description: stableData.description
-      },
-      ...combinedBlocks
-    ];
-    
-    return allBlocks.slice(0, gridDims.maxBlocks).map((block: any, index: number) => {
-      const blockConfig = getCategoryConfigByType(String(block.type || 'default'));
-      const BlockIcon = blockConfig.icon;
-      const blockName = String(block.name || 'Unknown Block').replace(' Block', '');
-      return (
-        <div 
-          key={index} 
-          style={{ 
-            width: `${cellSize.width}px`,
-            height: `${cellSize.height}px`,
-            padding: '3px',
-            borderRadius: '4px',
-            background: blockConfig.bgColor,
-            border: `1px solid ${blockConfig.borderColor}`,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1px',
-            position: 'relative',
-            textAlign: 'center',
-            boxSizing: 'border-box'
-          }}
-          title={String(block.name || 'Unknown Block')} // Tooltip with full name
-        >
-          <BlockIcon 
-            size={Math.max(8, Math.min(12, cellSize.width / 6))} 
-            color={blockConfig.iconColor}
-            strokeWidth={2}
-          />
-          <span style={{
-            fontSize: `${Math.max(4, Math.min(6, cellSize.width / 12))}px`,
-            fontWeight: '700',
-            color: blockConfig.iconColor,
-            lineHeight: '1',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            width: '100%',
-            textAlign: 'center'
-          }}>
-            {blockName}
-          </span>
-        </div>
-      );
-    });
-  }, [isCombined, stableData.label, stableData.blockType, stableData.description, combinedBlocks, gridDims.maxBlocks, cellSize.width, cellSize.height, currentNodeId]);
-
-  // Render empty cells
-  const renderedEmptyCells = useMemo(() => {
-    console.log(`🕳️ [${currentNodeId}] renderedEmptyCells memoization recalculated`);
-    if (!isCombined) return null;
-    
-    const visibleBlocks = Math.min(totalBlocks, gridDims.maxBlocks);
-    const emptyCells = Math.max(0, gridDims.maxBlocks - visibleBlocks);
-    return Array.from({ length: emptyCells }).map((_, index) => (
-      <div 
-        key={`empty-${index}`} 
-        style={{ 
-          width: `${cellSize.width}px`,
-          height: `${cellSize.height}px`,
-          border: '2px dashed #94a3b8',
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#64748b',
-          fontSize: `${Math.max(8, Math.min(10, cellSize.width / 6))}px`,
-          background: 'rgba(148, 163, 184, 0.05)',
-          fontWeight: '600'
-        }}
-      >
-        +
-      </div>
-    ));
-  }, [isCombined, totalBlocks, gridDims.maxBlocks, cellSize.width, cellSize.height, currentNodeId]);
-
-  // Block composition summary
-  const blockCompositionSummary = useMemo(() => {
-    console.log(`📝 [${currentNodeId}] blockCompositionSummary memoization recalculated`);
-    if (!isCombined) return null;
-    
-    // Get all block types including the original
-    const allBlockTypes = [
-      String(stableData.blockType || stableData.category || 'default'),
-      ...combinedBlocks.map((block: any) => String(block.type || 'default'))
-    ];
-    
-    // Count occurrences of each type
-    const typeCounts = allBlockTypes.reduce((acc: any, type: string) => {
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {});
-    
-    // Create summary string
-    const summary = Object.entries(typeCounts)
-      .map(([type, count]: [string, any]) => {
-        const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-        return count > 1 ? `${count} ${typeLabel}s` : `1 ${typeLabel}`;
-      })
-      .slice(0, 2) // Show max 2 types
-      .join(', ');
-    
-    const remainingTypes = Object.keys(typeCounts).length - 2;
-    return remainingTypes > 0 ? `${summary} +${remainingTypes} more` : summary;
-  }, [isCombined, stableData.blockType, stableData.category, combinedBlocks, currentNodeId]);
-
-  // Memoize main node styles
-  const nodeStyles = useMemo(() => {
-    console.log(`🎨 [${currentNodeId}] nodeStyles memoization recalculated - isSelected: ${isSelected}`);
-    
-    // Skeleton shimmer effect when syncing
-    const isShimmering = nodeStatus === 'syncing';
-    
-    return {
-      background: isShimmering ? 
-        'linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%)' :
-        isSelected ? 
-          'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%)' :
-          nodeConfig.bgColor,
-      border: isShimmering ?
-        '3px solid #cbd5e1' :
-        `3px solid ${nodeConfig.borderColor}`,
-      outline: isShimmering ?
-        '7px solid #e2e8f0' :
-        isSelected ? `7px solid ${nodeConfig.borderColor}` : 'none',
-      outlineOffset: (isShimmering || isSelected) ? '3px' : '3px',
-      borderRadius: '16px',
-      color: isShimmering ? '#94a3b8' : '#1e293b',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      fontSize: '12px',
-      fontWeight: '600',
-      padding: '16px 48px',
-      boxShadow: isSelected ? 
-        `0 12px 30px rgba(59, 130, 246, 0.25),
-         0 6px 20px rgba(0, 0, 0, 0.1),
-         inset 0 1px 0 rgba(255, 255, 255, 0.9)` :
-        `0 6px 20px rgba(0, 0, 0, 0.08),
-         0 3px 12px rgba(0, 0, 0, 0.04),
-         inset 0 1px 0 rgba(255, 255, 255, 0.9)`,
-      textShadow: 'none',
-      minWidth: isCombined ? '160px' : '140px',
-      minHeight: isCombined ? '120px' : '100px',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center' as const,
-      cursor: 'pointer',
-      position: 'relative' as const,
-      backgroundSize: isShimmering ? '200% 100%' : 'auto',
-      animation: isShimmering ? 'shimmer 2s ease-in-out infinite' : 'none',
-    };
-  }, [isSelected, nodeConfig, isCombined, currentNodeId, nodeStatus]);
-
-  // Memoize handle styles to prevent recreation on every render
-  const handleStyles = useMemo(() => {
-    console.log(`🔗 [${currentNodeId}] handleStyles memoization recalculated`);
-    const baseStyle = {
-      background: nodeConfig.borderColor,
-      border: '2px solid #ffffff',
-      width: '10px',
-      height: '10px',
-      boxShadow: `0 2px 8px ${nodeConfig.borderColor}40`,
-    };
-    
-    return {
-      target: baseStyle,
-      source: baseStyle
-    };
-  }, [nodeConfig.borderColor, currentNodeId]);
+  // Calculate how many items are inside the folder
+  const itemCount = isCombined ? 1 + combinedBlocks.length : 1;
 
   return (
     <div
-      className={`custom-node ${nodeStatus === 'syncing' ? 'shimmer-border shimmer-outline' : ''}`}
+      className="custom-node"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      style={nodeStyles}
+      style={{
+        minWidth: '300px',
+        minHeight: '140px',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+        cursor: 'pointer',
+      }}
     >
-      {/* Connection handles */}
+      {/* NodeResizer for resize functionality */}
+      <NodeResizer
+        minWidth={160}
+        minHeight={120}
+        isVisible={isSelected}
+        color="transparent"
+        handleStyle={{
+          backgroundColor: 'transparent',
+          border: 'none',
+          borderRadius: '0',
+          width: '20px',
+          height: '20px',
+          opacity: 0,
+        }}
+        lineStyle={{
+          borderColor: 'transparent',
+          borderWidth: '0px',
+          borderStyle: 'none',
+        }}
+      />
+
+      {/* Connection handles - hidden for simplified experience but kept for functionality */}
       <Handle
         type="target"
         position={Position.Top}
-        style={handleStyles.target}
+        style={{ opacity: 0, pointerEvents: 'none' }}
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        style={handleStyles.source}
+        style={{ opacity: 0, pointerEvents: 'none' }}
       />
       <Handle
         type="target"
         position={Position.Left}
-        style={handleStyles.target}
+        style={{ opacity: 0, pointerEvents: 'none' }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        style={handleStyles.source}
+        style={{ opacity: 0, pointerEvents: 'none' }}
       />
 
-      {/* Category icon(s) and combined blocks grid */}
-      {isCombined ? (
-        <div style={{
+      {/* macOS Finder Directory Style Container */}
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: isSelected
+            ? `linear-gradient(135deg, ${nodeConfig.folderColor}15 0%, ${nodeConfig.folderColor}25 100%)`
+            : `linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)`,
+          border: isSelected
+            ? `3px solid ${nodeConfig.folderColor}`
+            : nodeStatus === 'syncing' 
+              ? '2px solid rgba(59, 130, 246, 0.6)'
+              : '2px solid #e2e8f0',
+          borderRadius: '16px',
+          boxShadow: isSelected
+            ? `0 12px 32px ${nodeConfig.folderColor}25, 0 4px 16px rgba(0, 0, 0, 0.1)`
+            : nodeStatus === 'syncing'
+              ? '0 8px 24px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(59, 130, 246, 0.1)'
+              : '0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          marginBottom: '8px',
-          width: '100%'
-        }}>
-          {/* Combined blocks grid - all blocks treated equally */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${gridDims.cols}, 1fr)`,
-            gridTemplateRows: `repeat(${gridDims.rows}, 1fr)`,
-            gap: '4px',
-            width: `${cellSize.containerWidth}px`,
-            height: `${cellSize.containerHeight}px`,
-            margin: '0 auto',
-            padding: '0'
-          }}>
-            {renderedBlocks}
+          position: 'relative',
+          transition: 'all 0.2s ease-in-out',
+          backdropFilter: 'blur(10px)',
+          overflow: 'hidden',
+          // Add shimmer effect when syncing
+          ...(nodeStatus === 'syncing' && {
+            background: 'linear-gradient(90deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.55) 50%, transparent 55%, transparent 100%)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6) 50%, transparent)',
+              animation: 'shimmer 1.5s infinite',
+              zIndex: 1,
+            }
+          })
+        }}
+      >
+        {/* Shimmer overlay for syncing state */}
+        {nodeStatus === 'syncing' && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(90deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.55) 50%, transparent 55%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 2s infinite linear',
+              borderRadius: '16px',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
 
-            {renderedEmptyCells}
+        {/* Header with Folder Icon, Title, and Action Buttons */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${isSelected ? `${nodeConfig.folderColor}30` : '#e2e8f0'}`,
+            background: isSelected 
+              ? `linear-gradient(135deg, ${nodeConfig.folderColor}08 0%, ${nodeConfig.folderColor}12 100%)`
+              : 'linear-gradient(135deg, #ffffff80 0%, #f8fafc80 100%)',
+            borderTopLeftRadius: '14px',
+            borderTopRightRadius: '14px',
+            minHeight: '48px',
+            position: 'relative',
+            zIndex: 2, // Above shimmer overlay
+          }}
+        >
+          {/* Folder Icon or Agent Icon */}
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            {stableData.isAgent ? (
+              // Agent Icon - Circular with category color
+              <div
+                style={{
+                  position: 'relative',
+                  width: '32px',
+                  height: '32px',
+                  background: `linear-gradient(135deg, ${nodeConfig.folderColor} 0%, ${nodeConfig.folderColor}dd 100%)`,
+                  borderRadius: '50%',
+                  boxShadow: `0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px ${nodeConfig.folderColor}30`,
+                  border: '2px solid rgba(255, 255, 255, 0.9)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {/* Main agent icon */}
+                <IconComponent
+                  size={16}
+                  color="white"
+                  strokeWidth={2}
+                />
+                
+                {/* AI indicator badge */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '-3px',
+                    right: '-3px',
+                    width: '14px',
+                    height: '14px',
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    borderRadius: '50%',
+                    border: '2px solid white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(139, 92, 246, 0.3)',
+                  }}
+                >
+                  <svg
+                    width="6"
+                    height="6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 8V4H8"/>
+                    <rect width="16" height="12" x="4" y="8" rx="2"/>
+                    <path d="M2 14h2"/>
+                    <path d="M20 14h2"/>
+                    <path d="M15 13v2"/>
+                    <path d="M9 13v2"/>
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              // Directory Icon - Folder with category overlay
+              <>
+                {isSelected ? (
+                  <FolderOpen 
+                    size={24} 
+                    color={nodeConfig.folderColor}
+                    strokeWidth={1.5}
+                    style={{
+                      filter: `drop-shadow(0 1px 4px ${nodeConfig.folderColor}40)`,
+                    }}
+                  />
+                ) : (
+                  <Folder 
+                    size={24} 
+                    color={nodeConfig.folderColor}
+                    strokeWidth={1.5}
+                    style={{
+                      filter: `drop-shadow(0 1px 4px ${nodeConfig.folderColor}40)`,
+                    }}
+                  />
+                )}
+                
+                {/* Small category icon overlay */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    right: '-2px',
+                    background: 'white',
+                    borderRadius: '50%',
+                    padding: '2px',
+                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.15)',
+                    border: `1px solid ${nodeConfig.folderColor}`,
+                  }}
+                >
+                  <IconComponent
+                    size={8}
+                    color={nodeConfig.folderColor}
+                    strokeWidth={2}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Overflow indicator below grid */}
-          {totalBlocks > gridDims.maxBlocks && (
-            <div style={{
-              marginTop: '4px',
-              fontSize: '7px',
-              fontWeight: '600',
-              color: '#64748b',
-              textAlign: 'center'
-            }}>
-              +{totalBlocks - gridDims.maxBlocks} more blocks
+          {/* Title and Item Count */}
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0, // Allow text to shrink
+            }}
+          >
+            <div
+              style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#1e293b',
+                lineHeight: '1.2',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              {isCombined ? (
+                String(stableData.label || '').replace(' Block', '')
+              ) : (
+                String(stableData.label || '').replace(' Block', '')
+              )}
+              
+              {/* Agent indicator - only show for non-agent nodes that have agent functionality */}
+              {stableData.isAgent && false && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                    flexShrink: 0,
+                  }}
+                  title="AI Agent"
+                >
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 8V4H8"/>
+                    <rect width="16" height="12" x="4" y="8" rx="2"/>
+                    <path d="M2 14h2"/>
+                    <path d="M20 14h2"/>
+                    <path d="M15 13v2"/>
+                    <path d="M9 13v2"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#64748b',
+                fontWeight: '500',
+                marginTop: '1px',
+              }}
+            >
+              {stableData.isAgent ? (
+                `${itemCount} file${itemCount !== 1 ? 's' : ''} • AI Agent`
+              ) : (
+                `${itemCount} item${itemCount !== 1 ? 's' : ''}`
+              )}
+            </div>
+          </div>
+
+          {/* Directory Action Buttons */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexShrink: 0,
+            }}
+          >
+            {/* Run Button */}
+            <button
+              onClick={handleRun}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: '1px solid #10b981',
+                background: nodeStatus === 'syncing' ? '#10b981' : '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                padding: '0',
+                margin: '0',
+                boxSizing: 'border-box',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#10b981';
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', 'white');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = nodeStatus === 'syncing' ? '#10b981' : '#ffffff';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', nodeStatus === 'syncing' ? 'white' : '#10b981');
+              }}
+              title="Run workflow"
+            >
+              <Play 
+                size={10} 
+                color={nodeStatus === 'syncing' ? 'white' : '#10b981'}
+                strokeWidth={2}
+                style={{ marginLeft: '1px' }}
+              />
+            </button>
+
+            {/* Configure Button */}
+            <button
+              onClick={handleConfigure}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: '1px solid #6366f1',
+                background: '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                padding: '0',
+                margin: '0',
+                boxSizing: 'border-box',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#6366f1';
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.3)';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', 'white');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', '#6366f1');
+              }}
+              title="Configure settings"
+            >
+              <Settings 
+                size={10} 
+                color="#6366f1"
+                strokeWidth={2}
+              />
+            </button>
+
+            {/* Preview Button */}
+            <button
+              onClick={handlePreview}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: '1px solid #f59e0b',
+                background: '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                padding: '0',
+                margin: '0',
+                boxSizing: 'border-box',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f59e0b';
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.3)';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', 'white');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', '#f59e0b');
+              }}
+              title="Preview data"
+            >
+              <Eye 
+                size={10} 
+                color="#f59e0b"
+                strokeWidth={2}
+              />
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div
+            style={{
+              width: '1px',
+              height: '20px',
+              background: 'linear-gradient(180deg, transparent 0%, #cbd5e1 20%, #cbd5e1 80%, transparent 100%)',
+              marginLeft: '2px',
+              marginRight: '2px',
+              flexShrink: 0,
+            }}
+          />
+
+          {/* Window Control Buttons (Far Right) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexShrink: 0,
+            }}
+          >
+            {/* Minimize Button */}
+            <button
+              onClick={handleMinimize}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: '1px solid #f59e0b',
+                background: '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                padding: '0',
+                margin: '0',
+                boxSizing: 'border-box',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f59e0b';
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.3)';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', 'white');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', '#f59e0b');
+              }}
+              title="Minimize directory"
+            >
+              <Minus 
+                size={10} 
+                color="#f59e0b"
+                strokeWidth={2}
+              />
+            </button>
+
+            {/* Close Button */}
+            <button
+              onClick={handleClose}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: '1px solid #ef4444',
+                background: '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                padding: '0',
+                margin: '0',
+                boxSizing: 'border-box',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#ef4444';
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', 'white');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+                const icon = e.currentTarget.querySelector('svg');
+                if (icon) icon.setAttribute('stroke', '#ef4444');
+              }}
+              title="Close directory"
+            >
+              <X 
+                size={10}
+                color="#ef4444"
+                strokeWidth={2}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Content Area with Grid Layout */}
+        <div
+          style={{
+            flex: 1,
+            padding: '12px',
+            display: 'flex',
+            alignItems: isCombined ? 'flex-start' : 'center',
+            justifyContent: isCombined ? 'flex-start' : 'center',
+            minHeight: 0, // Allow content to shrink
+            position: 'relative',
+            zIndex: 2, // Above shimmer overlay
+          }}
+        >
+          {/* For agent nodes: show single content if 1 block, grid if 2+ blocks */}
+          {/* For non-agent nodes: show grid if any combinedBlocks */}
+          {(isCombined && combinedBlocks.length > 0 && (!stableData.isAgent || combinedBlocks.length > 1)) ? (
+            // Grid layout for combined blocks as files
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(50px, 1fr))',
+                gap: '8px',
+                width: '100%',
+                alignItems: 'start',
+                justifyItems: 'center',
+              }}
+            >
+              {/* For non-agent nodes, show original block as file */}
+              {!stableData.isAgent && (
+                <div
+                  style={{
+                    width: '50px',
+                    textAlign: 'center',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+                  }}
+                >
+                  {createFileIcon(
+                    String(stableData.blockType || stableData.category || 'default'),
+                    String(stableData.label || '').replace(' Block', ''),
+                    'small'
+                  )}
+                  <div
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: '500',
+                      color: '#1d1d1f',
+                      lineHeight: '1.2',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      marginBottom: '1px',
+                    }}
+                  >
+                    {String(stableData.label || '').replace(' Block', '').replace(/\s+/g, '_').substring(0, 8)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '6px',
+                      color: '#a1a1a6',
+                      fontWeight: '400',
+                    }}
+                  >
+                    {String(stableData.blockType || stableData.category || 'file').replace('-', ' ')}
+                  </div>
+                </div>
+              )}
+
+              {/* Show combined blocks as files */}
+              {combinedBlocks.slice(0, stableData.isAgent ? 12 : 11).map((block: any, index: number) => (
+                <div
+                  key={index}
+                  style={{
+                    width: '50px',
+                    textAlign: 'center',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+                  }}
+                >
+                  {createFileIcon(
+                    String(block.type || 'default'),
+                    String(block.name || 'Unknown Block'),
+                    'small'
+                  )}
+                  <div
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: '500',
+                      color: '#1d1d1f',
+                      lineHeight: '1.2',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      marginBottom: '1px',
+                    }}
+                  >
+                    {String(block.name || 'Unknown').replace(' Block', '').replace(/\s+/g, '_').substring(0, 8)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '6px',
+                      color: '#a1a1a6',
+                      fontWeight: '400',
+                    }}
+                  >
+                    {String(block.type || 'file').replace('-', ' ')}
+                  </div>
+                </div>
+              ))}
+
+              {/* Show overflow indicator as a special file */}
+              {combinedBlocks.length > (stableData.isAgent ? 12 : 11) && (
+                <div
+                  style={{
+                    width: '50px',
+                    textAlign: 'center',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'relative',
+                      width: '20px',
+                      height: '25px',
+                      margin: '0 auto 4px auto',
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '2px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '8px',
+                      fontWeight: '600',
+                      color: '#64748b',
+                      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.15)',
+                    }}
+                    title={`+${combinedBlocks.length - (stableData.isAgent ? 12 : 11)} more files`}
+                  >
+                    +{combinedBlocks.length - (stableData.isAgent ? 12 : 11)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: '500',
+                      color: '#1d1d1f',
+                      lineHeight: '1.2',
+                    }}
+                  >
+                    more...
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '6px',
+                      color: '#a1a1a6',
+                      fontWeight: '400',
+                    }}
+                  >
+                    files
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Single block display
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                textAlign: 'center',
+                maxWidth: '100%',
+              }}
+            >
+              {stableData.isAgent && combinedBlocks.length === 0 ? (
+                // Agent drop zone when no files
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '16px',
+                    border: '2px dashed rgba(139, 92, 246, 0.3)',
+                    borderRadius: '8px',
+                    background: 'rgba(139, 92, 246, 0.05)',
+                    width: '100%',
+                    minHeight: '60px',
+                  }}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(139, 92, 246, 0.6)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 8V4H8"/>
+                    <rect width="16" height="12" x="4" y="8" rx="2"/>
+                    <path d="M2 14h2"/>
+                    <path d="M20 14h2"/>
+                    <path d="M15 13v2"/>
+                    <path d="M9 13v2"/>
+                  </svg>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: 'rgba(139, 92, 246, 0.8)',
+                      fontWeight: '500',
+                    }}
+                  >
+                    Drop files here to process
+                  </div>
+                </div>
+              ) : stableData.isAgent && combinedBlocks.length === 1 ? (
+                // Agent with single file - show as large file icon
+                <>
+                  {createFileIcon(
+                    String(combinedBlocks[0].type || 'default'),
+                    String(combinedBlocks[0].name || 'Unknown Block'),
+                    'large'
+                  )}
+
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: '#64748b',
+                      lineHeight: '1.3',
+                      maxWidth: '140px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {String(combinedBlocks[0].description || combinedBlocks[0].name || 'File ready for processing')}
+                  </div>
+                </>
+              ) : (
+                // Regular file icon for non-agents or when no description
+                <>
+                  {createFileIcon(
+                    String(stableData.blockType || stableData.category || 'default'),
+                    String(stableData.label || '').replace(' Block', ''),
+                    'large'
+                  )}
+
+                  {stableData.description && (
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        color: '#64748b',
+                        lineHeight: '1.3',
+                        maxWidth: '140px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {String(stableData.description)}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
-      ) : (
-        <div style={{
-          marginBottom: '8px',
-          padding: '8px',
-          borderRadius: '8px',
-          background: 'rgba(255, 255, 255, 0.8)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        }}>
-          <IconComponent
-            size={20}
-            color={nodeConfig.iconColor}
-            strokeWidth={2.5}
-          />
-        </div>
-      )}
-
-      {/* Node content */}
-      <div style={{ textAlign: 'center', width: '100%' }}>
-        <div style={{
-          fontSize: isCombined ? '12px' : '13px',
-          marginBottom: '4px',
-          color: '#1e293b',
-          fontWeight: '700',
-          lineHeight: '1.2'
-        }}>
-          {isCombined ? (
-            // Generic name for combined nodes
-            `Combined Workflow (${totalBlocks})`
-          ) : (
-            // Original block name for single nodes
-            String(stableData.label || '').replace(' Block', '')
-          )}
-        </div>
-
-        {/* Show description only for non-combined nodes */}
-        {!isCombined && stableData.description && typeof stableData.description === 'string' ? (
-          <div style={{
-            fontSize: '10px',
-            opacity: 0.75,
-            maxWidth: '120px',
-            lineHeight: '1.3',
-            color: '#64748b',
-            fontWeight: '400'
-          }}>
-            {stableData.description}
-          </div>
-        ) : null}
-
-        {/* Show block composition summary for combined nodes */}
-        {isCombined && (
-          <div style={{
-            fontSize: '9px',
-            opacity: 0.75,
-            maxWidth: '120px',
-            lineHeight: '1.3',
-            color: '#64748b',
-            fontWeight: '400'
-          }}>
-            {blockCompositionSummary}
-          </div>
-        )}
       </div>
-
-      {/* Action Bar */}
-      <ActionBar
-        nodeId={String(stableData.id || '')}
-        status={nodeStatus}
-        onRun={handleRun}
-        onConfigure={handleConfigure}
-        onPreview={handlePreview}
-      />
 
       {/* Configuration Popover */}
       {showConfigPopover && (
@@ -700,7 +1311,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
             }}
             onClick={() => setShowConfigPopover(false)}
           />
-          
+
           {/* Popover */}
           <div
             style={{
@@ -710,7 +1321,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
               marginLeft: '10px',
               width: '300px',
               background: 'white',
-              border: `2px solid ${nodeConfig.borderColor}`,
+              border: `2px solid ${nodeConfig.folderColor}`,
               borderRadius: '12px',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
               zIndex: 1001,
@@ -721,9 +1332,9 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
             {/* Header */}
             <Box
               sx={{
-                background: `linear-gradient(135deg, ${nodeConfig.borderColor}10 0%, ${nodeConfig.borderColor}20 100%)`,
+                background: `linear-gradient(135deg, ${nodeConfig.folderColor}10 0%, ${nodeConfig.folderColor}20 100%)`,
                 p: 1.5,
-                borderBottom: `1px solid ${nodeConfig.borderColor}30`,
+                borderBottom: `1px solid ${nodeConfig.folderColor}30`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -761,7 +1372,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
                 fullWidth
                 variant="outlined"
                 size="small"
-                sx={{ 
+                sx={{
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: '#fafbfc',
@@ -776,13 +1387,13 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
                     borderColor: '#e5e7eb',
                   },
                   '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: nodeConfig.borderColor,
+                    borderColor: nodeConfig.folderColor,
                   },
                   '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: nodeConfig.borderColor,
+                    borderColor: nodeConfig.folderColor,
                   },
                   '& .MuiInputLabel-root.Mui-focused': {
-                    color: nodeConfig.borderColor,
+                    color: nodeConfig.folderColor,
                   },
                 }}
               />
@@ -796,7 +1407,7 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
                 rows={2}
                 variant="outlined"
                 size="small"
-                sx={{ 
+                sx={{
                   mb: 2.5,
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: '#fafbfc',
@@ -811,13 +1422,13 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
                     borderColor: '#e5e7eb',
                   },
                   '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: nodeConfig.borderColor,
+                    borderColor: nodeConfig.folderColor,
                   },
                   '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: nodeConfig.borderColor,
+                    borderColor: nodeConfig.folderColor,
                   },
                   '& .MuiInputLabel-root.Mui-focused': {
-                    color: nodeConfig.borderColor,
+                    color: nodeConfig.folderColor,
                   },
                 }}
               />
@@ -856,12 +1467,12 @@ const CustomNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
                     setShowConfigPopover(false);
                   }}
                   sx={{
-                    backgroundColor: nodeConfig.borderColor,
+                    backgroundColor: nodeConfig.folderColor,
                     '&:hover': {
-                      backgroundColor: nodeConfig.borderColor,
+                      backgroundColor: nodeConfig.folderColor,
                       opacity: 0.9,
                       transform: 'translateY(-1px)',
-                      boxShadow: `0 4px 8px ${nodeConfig.borderColor}30`,
+                      boxShadow: `0 4px 8px ${nodeConfig.folderColor}30`,
                     },
                   }}
                 >
@@ -881,11 +1492,11 @@ const arePropsEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
   // Compare basic props
   if (prevProps.selected !== nextProps.selected) return false;
   if (prevProps.id !== nextProps.id) return false;
-  
+
   // Compare data object properties that actually matter for rendering
   const prevData = prevProps.data;
   const nextData = nextProps.data;
-  
+
   // Only compare the properties we actually use in rendering
   if (prevData.id !== nextData.id) return false;
   if (prevData.label !== nextData.label) return false;
@@ -893,18 +1504,18 @@ const arePropsEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
   if (prevData.category !== nextData.category) return false;
   if (prevData.description !== nextData.description) return false;
   if (prevData.prompt !== nextData.prompt) return false;
-  
+
   // Compare combinedBlocks array deeply
   const prevCombined = (prevData.combinedBlocks as any[]) || [];
   const nextCombined = (nextData.combinedBlocks as any[]) || [];
-  
+
   if (prevCombined.length !== nextCombined.length) return false;
-  
+
   for (let i = 0; i < prevCombined.length; i++) {
     if (prevCombined[i]?.type !== nextCombined[i]?.type) return false;
     if (prevCombined[i]?.name !== nextCombined[i]?.name) return false;
   }
-  
+
   // If all relevant properties are the same, don't re-render
   return true;
 };

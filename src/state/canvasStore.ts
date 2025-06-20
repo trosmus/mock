@@ -5,8 +5,14 @@ interface CanvasNode {
   type: string;
   position: { x: number; y: number };
   data: {
+    id?: string;
     label: string;
     description?: string;
+    prompt?: string;
+    blockType?: string;
+    category?: string;
+    combinedBlocks?: any[];
+    isAgent?: boolean;
   };
 }
 
@@ -46,6 +52,12 @@ interface CanvasState {
   // Modal state
   previewModalNodeId: string | null;
   
+  // Minimized nodes
+  minimizedNodes: CanvasNode[];
+  
+  // UI State
+  isDrawerExpanded: boolean;
+  
   // Actions
   setSelectedNode: (nodeId: string | null) => void;
   setSelectedEdge: (edgeId: string | null) => void;
@@ -57,6 +69,14 @@ interface CanvasState {
   // Modal actions
   openPreviewModal: (nodeId: string) => void;
   closePreviewModal: () => void;
+  
+  // Node management
+  minimizeNode: (nodeId: string) => void;
+  maximizeNode: (nodeId: string) => void;
+  removeNode: (nodeId: string) => void;
+  
+  // UI actions
+  setDrawerExpanded: (expanded: boolean) => void;
   
   // Data management
   setNodes: (nodes: CanvasNode[]) => void;
@@ -73,6 +93,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   insights: [],
   currentInsight: null,
   previewModalNodeId: null,
+  minimizedNodes: [],
+  isDrawerExpanded: false,
 
   // Actions
   setSelectedNode: (nodeId) => set({ 
@@ -115,6 +137,33 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   closePreviewModal: () => set({ 
     previewModalNodeId: null 
   }),
+  
+  minimizeNode: (nodeId) => set((state) => {
+    const nodeToMinimize = state.nodes.find(n => n.id === nodeId);
+    if (!nodeToMinimize) return state;
+    
+    return {
+      nodes: state.nodes.filter(n => n.id !== nodeId),
+      minimizedNodes: [...state.minimizedNodes, nodeToMinimize]
+    };
+  }),
+  
+  maximizeNode: (nodeId) => set((state) => {
+    const nodeToRestore = state.minimizedNodes.find(n => n.id === nodeId);
+    if (!nodeToRestore) return state;
+    
+    return {
+      nodes: [...state.nodes, nodeToRestore],
+      minimizedNodes: state.minimizedNodes.filter(n => n.id !== nodeId)
+    };
+  }),
+  
+  removeNode: (nodeId) => set((state) => ({
+    nodes: state.nodes.filter(n => n.id !== nodeId),
+    edges: state.edges.filter(e => e.source !== nodeId && e.target !== nodeId)
+  })),
+  
+  setDrawerExpanded: (expanded) => set({ isDrawerExpanded: expanded }),
   
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges })

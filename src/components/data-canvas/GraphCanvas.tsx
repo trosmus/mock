@@ -5,9 +5,9 @@ import {
   Background,
   useNodesState,
   useEdgesState,
-  addEdge,
   BackgroundVariant,
   Position,
+  ConnectionMode,
 } from '@xyflow/react';
 import type { Node, Edge, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -68,113 +68,177 @@ const futuristicStyles = `
   .react-flow__edge-path {
     filter: none !important;
   }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
 `;
 
-// Sample data based on requirements - updated to reflect drawer blocks
+// Sample data based on requirements - updated to look like agent-created nodes
 const initialNodes: Node[] = [
-  // Dataset Blocks
+  // Data Analyst Agent Node
   {
-    id: 'patients-dataset',
+    id: 'data-analyst-1',
     type: 'custom',
-    position: { x: 0, y: 0 },
+    position: { x: 100, y: 100 },
     data: {
-      id: 'patients-dataset',
-      label: 'Patients Dataset Block',
-      description: 'Represents the patients.csv table (demographics)',
-      prompt: 'Load and analyze the patients dataset. Examine demographic patterns, age distributions, gender ratios, and identify any data quality issues. Provide insights on population characteristics and suggest potential cohorts for analysis.',
-      blockType: 'dataset'
+      id: 'data-analyst-1',
+      label: 'Data Analyst',
+      description: 'Analyzes datasets and generates insights',
+      prompt: 'I am a data analyst agent that can examine datasets, identify patterns, and generate comprehensive analytical insights.',
+      blockType: 'dataset',
+      category: 'dataset',
+      isAgent: true,
+      combinedBlocks: [
+        {
+          id: 'patients-dataset',
+          name: 'Patients Dataset',
+          type: 'dataset',
+          description: 'Patient demographics and information'
+        },
+        {
+          id: 'encounters-dataset',
+          name: 'Encounters Dataset',
+          type: 'dataset',
+          description: 'Healthcare visit records'
+        },
+        {
+          id: 'conditions-dataset',
+          name: 'Medical Conditions',
+          type: 'dataset',
+          description: 'Patient diagnosis and condition data'
+        }
+      ]
     },
   },
+  // Chart Creator Agent Node
   {
-    id: 'encounters-dataset',
+    id: 'chart-creator-1',
     type: 'custom',
-    position: { x: 0, y: 0 },
+    position: { x: 400, y: 100 },
     data: {
-      id: 'encounters-dataset',
-      label: 'Encounters Dataset Block',
-      description: 'Represents the encounters.csv table (healthcare visits)',
-      prompt: 'Analyze healthcare encounters data to understand visit patterns, encounter types, seasonal trends, and utilization rates. Identify high-frequency patients and examine care continuity patterns.',
-      blockType: 'dataset'
+      id: 'chart-creator-1',
+      label: 'Chart Creator',
+      description: 'Creates various types of charts and graphs',
+      prompt: 'I create compelling visualizations including bar charts, line graphs, scatter plots, and other chart types to represent data effectively.',
+      blockType: 'visualization',
+      category: 'visualization',
+      isAgent: true,
+      combinedBlocks: [
+        {
+          id: 'condition-chart',
+          name: 'Condition Chart',
+          type: 'visualization',
+          description: 'Bar chart of common conditions'
+        },
+        {
+          id: 'age-distribution',
+          name: 'Age Distribution',
+          type: 'visualization',
+          description: 'Histogram of patient ages'
+        },
+        {
+          id: 'trend-analysis',
+          name: 'Trend Analysis',
+          type: 'visualization',
+          description: 'Line chart of healthcare trends'
+        },
+        {
+          id: 'demographic-pie',
+          name: 'Demographics Pie',
+          type: 'visualization',
+          description: 'Pie chart of patient demographics'
+        }
+      ]
     },
   },
-  // Commented out to improve performance
-  // {
-  //   id: 'medications-dataset',
-  //   type: 'custom',
-  //   position: { x: 0, y: 0 },
-  //   data: {
-  //     id: 'medications-dataset',
-  //     label: 'Medications Dataset Block',
-  //     description: 'Represents the medications.csv table (prescriptions)',
-  //     prompt: 'Examine prescription patterns, medication adherence, drug interactions, and therapeutic classes. Identify polypharmacy cases and analyze prescribing trends across different patient populations.',
-  //     blockType: 'dataset'
-  //   },
-  // },
-  // Filter Blocks
+  // SQL Expert Agent Node
   {
-    id: 'age-range-filter',
+    id: 'sql-expert-1',
     type: 'custom',
-    position: { x: 0, y: 0 },
+    position: { x: 100, y: 350 },
     data: {
-      id: 'age-range-filter',
-      label: 'Age Range Filter',
-      description: 'Filter patients by age (e.g., 18–65)',
-      prompt: 'Apply age-based filtering to focus analysis on specific age cohorts (e.g., 18-65 working age, 65+ elderly, pediatric populations). Analyze how health outcomes and utilization patterns vary across age groups.',
-      blockType: 'filter'
+      id: 'sql-expert-1',
+      label: 'SQL Expert',
+      description: 'Writes complex SQL queries',
+      prompt: 'I write optimized SQL queries for data extraction, aggregation, and complex analytical operations across multiple tables.',
+      blockType: 'sql',
+      category: 'sql',
+      isAgent: true,
+      combinedBlocks: [
+        {
+          id: 'count-patients-sql',
+          name: 'Count Patients Query',
+          type: 'sql',
+          description: 'SQL query to count total patients'
+        },
+        {
+          id: 'top-conditions-query',
+          name: 'Top Conditions Query',
+          type: 'sql',
+          description: 'Query most common medical conditions'
+        },
+        {
+          id: 'age-filter',
+          name: 'Age Range Filter',
+          type: 'filter',
+          description: 'Filter patients by age groups'
+        },
+        {
+          id: 'join-tables',
+          name: 'Join Tables Query',
+          type: 'sql',
+          description: 'Join patient and encounter data'
+        },
+        {
+          id: 'aggregate-stats',
+          name: 'Aggregate Statistics',
+          type: 'sql',
+          description: 'Calculate summary statistics'
+        }
+      ]
     },
   },
-  // Commented out to improve performance
-  // {
-  //   id: 'gender-filter',
-  //   type: 'custom',
-  //   position: { x: 0, y: 0 },
-  //   data: {
-  //     id: 'gender-filter',
-  //     label: 'Gender Filter',
-  //     description: 'Filter by gender (male, female, other)',
-  //     prompt: 'Filter data by gender to examine gender-specific health patterns, condition prevalence differences, and care utilization disparities between male, female, and other gender categories.',
-  //     blockType: 'filter'
-  //   },
-  // },
-  // SQL/Query Blocks
+  // Report Writer Agent Node
   {
-    id: 'count-patients',
+    id: 'report-writer-1',
     type: 'custom',
-    position: { x: 0, y: 0 },
+    position: { x: 400, y: 350 },
     data: {
-      id: 'count-patients',
-      label: 'Count Patients Block',
-      description: 'SQL: SELECT COUNT(*) FROM patients',
-      prompt: 'Calculate total patient counts and analyze population size metrics. Break down counts by key demographics, enrollment periods, and active vs inactive patients. Provide statistical summaries and growth trends.',
-      blockType: 'sql'
-    },
-  },
-  // Visualization Blocks
-  {
-    id: 'bar-chart',
-    type: 'custom',
-    position: { x: 0, y: 0 },
-    data: {
-      id: 'bar-chart',
-      label: 'Bar Chart Block',
-      description: 'Top 10 most common conditions',
-      prompt: 'Create a bar chart visualization showing the top 10 most common medical conditions. Analyze prevalence rates, compare across demographics, and highlight significant patterns or outliers in the data.',
-      blockType: 'visualization'
+      id: 'report-writer-1',
+      label: 'Report Writer',
+      description: 'Generates comprehensive reports',
+      prompt: 'I write detailed reports that summarize findings, provide insights, and make recommendations based on data analysis.',
+      blockType: 'narrative',
+      category: 'narrative',
+      isAgent: true,
+      combinedBlocks: [
+        {
+          id: 'clinical-summary',
+          name: 'Clinical Summary',
+          type: 'narrative',
+          description: 'Clinical insights and recommendations'
+        },
+        {
+          id: 'population-report',
+          name: 'Population Report',
+          type: 'narrative',
+          description: 'Demographic analysis summary'
+        },
+        {
+          id: 'quality-metrics',
+          name: 'Quality Metrics',
+          type: 'narrative',
+          description: 'Healthcare quality indicators'
+        }
+      ]
     },
   }
-  // Commented out to improve performance
-  // {
-  //   id: 'line-chart',
-  //   type: 'custom',
-  //   position: { x: 0, y: 0 },
-  //   data: {
-  //     id: 'line-chart',
-  //     label: 'Line Chart Block',
-  //     description: 'Monthly encounter volume over time',
-  //     prompt: 'Generate a line chart showing monthly encounter volume trends over time. Identify seasonal patterns, growth trends, and any anomalies. Correlate with external factors like flu seasons or policy changes.',
-  //     blockType: 'visualization'
-  //   },
-  // },
 ];
 
 const initialEdges: Edge[] = [
@@ -382,9 +446,16 @@ const GraphCanvas: React.FC = () => {
   console.log('🌐 GraphCanvas render');
 
   const {
+    selectedNodeId,
+    selectedEdgeId,
     setSelectedNode,
     setSelectedEdge,
-    addInsight
+    addInsight,
+    minimizedNodes,
+    maximizeNode,
+    nodes: storeNodes,
+    setNodes: setStoreNodes,
+    isDrawerExpanded
   } = useCanvasStore();
 
   // Inject styles only once
@@ -416,12 +487,55 @@ const GraphCanvas: React.FC = () => {
   }, []);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+  const [, , onEdgesChange] = useEdgesState(layoutedEdges); // Keep edges state but don't use the values
 
-  const onConnect = useCallback((params: Connection) => {
-    console.log('🔗 onConnect callback fired:', params);
-    setEdges((eds) => addEdge(params, eds));
-  }, [setEdges]);
+  // Sync store nodes with local state on mount
+  useEffect(() => {
+    if (storeNodes.length === 0) {
+      // Initialize store with layouted nodes if empty
+      setStoreNodes(layoutedNodes.map(node => ({
+        id: node.id,
+        type: node.type || 'custom',
+        position: node.position,
+        data: {
+          id: node.data.id as string,
+          label: node.data.label as string,
+          description: node.data.description as string,
+          prompt: node.data.prompt as string,
+          blockType: node.data.blockType as string,
+          category: node.data.category as string,
+          combinedBlocks: node.data.combinedBlocks as any[]
+        }
+      })));
+    }
+  }, [storeNodes.length, layoutedNodes, setStoreNodes]);
+
+  // Update store when local nodes change
+  useEffect(() => {
+    if (nodes.length > 0) {
+      setStoreNodes(nodes.map(node => ({
+        id: node.id,
+        type: node.type || 'custom',
+        position: node.position,
+        data: {
+          id: node.data.id as string,
+          label: node.data.label as string,
+          description: node.data.description as string,
+          prompt: node.data.prompt as string,
+          blockType: node.data.blockType as string,
+          category: node.data.category as string,
+          combinedBlocks: node.data.combinedBlocks as any[]
+        }
+      })));
+    }
+  }, [nodes, setStoreNodes]);
+
+  // Disabled connection handler to prevent edge creation
+  const onConnect = useCallback((_params: Connection) => {
+    // Edge creation disabled for simplified user experience
+    console.log('🚫 Edge creation disabled for simplified user flow');
+    return;
+  }, []);
 
   // Handle node combination
   const handleNodeCombination = useCallback((event: CustomEvent) => {
@@ -433,14 +547,23 @@ const GraphCanvas: React.FC = () => {
         if (node.id === targetNodeId) {
           const existingCombined = (node.data.combinedBlocks as any[]) || [];
           const updatedCombinedBlocks = [...existingCombined, newBlock];
+          
+          // Check if this is an agent node
+          const isAgentNode = node.data.isAgent;
+          const baseLabel = isAgentNode 
+            ? String(node.data.label || '').replace(' Agent', '')
+            : String(node.data.label || '');
 
           return {
             ...node,
             data: {
               ...node.data,
               combinedBlocks: updatedCombinedBlocks,
-              label: `${node.data.label} + ${newBlock.name}`, // Keep full block name
-              description: `Combined: ${node.data.description} + ${newBlock.description}`
+              label: isAgentNode 
+                ? `${baseLabel} Agent` // Keep agent designation
+                : `${baseLabel} + ${newBlock.name}`, // Original behavior for non-agents
+              description: `${node.data.description} | Processing: ${newBlock.description}`,
+              nodeStatus: 'unsynced' // Reset to unsynced when modified
             }
           };
         }
@@ -450,10 +573,74 @@ const GraphCanvas: React.FC = () => {
 
     // Add insight about the combination
     addInsight({
-      content: `Combined ${newBlock.name} with existing node. This creates a more complex workflow component that can handle multiple operations.`,
+      content: `Added ${newBlock.name} to ${targetNodeId}. The node needs to be run again to process the new data.`,
       nodeId: targetNodeId
     });
   }, [setNodes, addInsight]);
+
+  // Handle node minimization
+  const handleNodeMinimize = useCallback((event: CustomEvent) => {
+    console.log('📦 handleNodeMinimize callback fired:', event.detail);
+    const { nodeId } = event.detail;
+
+    // Find the node to minimize
+    const nodeToMinimize = nodes.find(n => n.id === nodeId);
+    if (nodeToMinimize) {
+      // Convert ReactFlow node to CanvasNode format and add to store's minimized nodes
+      const storeNode = {
+        id: nodeToMinimize.id,
+        type: nodeToMinimize.type || 'custom',
+        position: nodeToMinimize.position,
+        data: {
+          id: nodeToMinimize.data.id as string,
+          label: nodeToMinimize.data.label as string,
+          description: nodeToMinimize.data.description as string,
+          prompt: nodeToMinimize.data.prompt as string,
+          blockType: nodeToMinimize.data.blockType as string,
+          category: nodeToMinimize.data.category as string,
+          combinedBlocks: nodeToMinimize.data.combinedBlocks as any[]
+        }
+      };
+
+      // Add to store's minimized nodes directly
+      const { minimizedNodes } = useCanvasStore.getState();
+      useCanvasStore.setState({
+        minimizedNodes: [...minimizedNodes, storeNode]
+      });
+
+      // Remove from local ReactFlow nodes
+      setNodes((nds) => nds.filter(n => n.id !== nodeId));
+
+      // Add insight about minimization
+      addInsight({
+        content: `Minimized ${nodeToMinimize.data.label}. You can restore it from the dock at the bottom of the screen.`,
+        nodeId: nodeId
+      });
+    }
+  }, [nodes, setNodes, addInsight]);
+
+  // Handle node removal
+  const handleNodeRemove = useCallback((event: CustomEvent) => {
+    console.log('❌ handleNodeRemove callback fired:', event.detail);
+    const { nodeId } = event.detail;
+
+    // Find the node to remove
+    const nodeToRemove = nodes.find(n => n.id === nodeId);
+    if (nodeToRemove) {
+      // Remove from store
+      const { removeNode } = useCanvasStore.getState();
+      removeNode(nodeId);
+
+      // Remove from local ReactFlow nodes
+      setNodes((nds) => nds.filter(n => n.id !== nodeId));
+
+      // Add insight about removal
+      addInsight({
+        content: `Removed ${nodeToRemove.data.label} from the canvas. This action cannot be undone.`,
+        nodeId: nodeId
+      });
+    }
+  }, [nodes, setNodes, addInsight]);
 
   // Set up event listener for node combination
   useEffect(() => {
@@ -477,15 +664,27 @@ const GraphCanvas: React.FC = () => {
       console.log(`Edge ${edgeId} configured with block:`, blockData);
     };
 
+    const handleMinimizeEvent = (event: CustomEvent) => {
+      handleNodeMinimize(event);
+    };
+
+    const handleRemoveEvent = (event: CustomEvent) => {
+      handleNodeRemove(event);
+    };
+
     window.addEventListener('combineNode', handleCombineEvent as EventListener);
     window.addEventListener('configureEdge', handleEdgeConfigureEvent as EventListener);
+    window.addEventListener('minimizeNode', handleMinimizeEvent as EventListener);
+    window.addEventListener('removeNode', handleRemoveEvent as EventListener);
 
     return () => {
       console.log('🧹 Cleaning up event listeners');
       window.removeEventListener('combineNode', handleCombineEvent as EventListener);
       window.removeEventListener('configureEdge', handleEdgeConfigureEvent as EventListener);
+      window.removeEventListener('minimizeNode', handleMinimizeEvent as EventListener);
+      window.removeEventListener('removeNode', handleRemoveEvent as EventListener);
     };
-  }, [handleNodeCombination, addInsight]);
+  }, [handleNodeCombination, handleNodeMinimize, handleNodeRemove, addInsight]);
 
   // Handle drag over for the canvas
   const handleCanvasDragOver = useCallback((event: React.DragEvent) => {
@@ -500,45 +699,59 @@ const GraphCanvas: React.FC = () => {
     event.preventDefault();
 
     try {
-      const blockData = JSON.parse(event.dataTransfer.getData('application/json'));
+      const dropData = JSON.parse(event.dataTransfer.getData('application/json'));
 
-      // Get the canvas bounds to calculate relative position
-      const canvasElement = event.currentTarget as HTMLElement;
-      const canvasBounds = canvasElement.getBoundingClientRect();
+      // Check if it's an agent or a block
+      if (dropData.isAgent) {
+        // Agents create new nodes on canvas
+        console.log('🤖 Dropping agent on canvas:', dropData.name);
 
-      // Calculate position relative to canvas
-      const position = {
-        x: event.clientX - canvasBounds.left - 100, // Offset to center the node
-        y: event.clientY - canvasBounds.top - 40,
-      };
+        // Get the canvas bounds to calculate relative position
+        const canvasElement = event.currentTarget as HTMLElement;
+        const canvasBounds = canvasElement.getBoundingClientRect();
 
-      // Create new node from dropped block
-      const newNode = {
-        id: `${blockData.id}-${Date.now()}`, // Make unique ID
-        type: 'custom' as const,
-        position,
-        targetPosition: Position.Top,
-        sourcePosition: Position.Bottom,
-        data: {
-          id: `${blockData.id}-${Date.now()}`,
-          label: blockData.name, // Keep full block name
-          description: blockData.description,
-          prompt: blockData.prompt,
-          blockType: blockData.type
-        },
-      };
+        // Calculate position relative to canvas
+        const position = {
+          x: event.clientX - canvasBounds.left - 100, // Offset to center the node
+          y: event.clientY - canvasBounds.top - 40,
+        };
+
+        // Create new node from dropped agent
+        const newNode = {
+          id: `${dropData.id}-${Date.now()}`, // Make unique ID
+          type: 'custom' as const,
+          position,
+          targetPosition: Position.Top,
+          sourcePosition: Position.Bottom,
+          data: {
+            id: `${dropData.id}-${Date.now()}`,
+            label: dropData.name.replace(' Agent', ''), // Remove "Agent" from label
+            description: dropData.description,
+            prompt: dropData.prompt,
+            blockType: dropData.type, // Use the agent's category as blockType
+            isAgent: true,
+            nodeStatus: 'unsynced' // Start as unsynced (grey)
+          },
+        };
 
       // Add the new node
       setNodes((nds) => [...nds, newNode]);
 
-      // Add insight about the new node
-      addInsight({
-        content: `Added ${blockData.name} to the canvas. This ${blockData.type} block can be connected to other nodes to build your data workflow.`,
-        nodeId: newNode.id
-      });
+        // Add insight about the new agent node
+        addInsight({
+          content: `Added ${dropData.name} to the canvas. This AI agent is ready to process data files that you drag to it.`,
+          nodeId: newNode.id
+        });
+      } else {
+        // Blocks can only be dropped on existing nodes, not on empty canvas
+        console.log('📄 Block dropped on empty canvas - not allowed');
+        addInsight({
+          content: `Blocks can only be dropped on existing agent nodes. First create an agent, then drag blocks to it.`,
+        });
+      }
 
     } catch (error) {
-      console.error('Failed to parse dropped block:', error);
+      console.error('Failed to parse dropped data:', error);
     }
   }, [setNodes, addInsight]);
 
@@ -554,20 +767,12 @@ const GraphCanvas: React.FC = () => {
     });
   }, [setSelectedNode, addInsight]);
 
-  const onEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
-    console.log('🖱️ onEdgeClick callback fired for:', edge.id);
-    console.log('Edge clicked:', edge.id);
-    setSelectedEdge(edge.id);
-
-    // Add sample insight for edge click
-    const sourceNode = nodes.find(n => n.id === edge.source);
-    const targetNode = nodes.find(n => n.id === edge.target);
-
-    addInsight({
-      content: `Analyzing relationship between ${sourceNode?.data.label} and ${targetNode?.data.label}. This connection shows ${edge.data?.relationship || 'a key relationship'} that could be explored further for insights.`,
-      edgeId: edge.id
-    });
-  }, [setSelectedEdge, addInsight, nodes]);
+  // Disabled edge click handler
+  const onEdgeClick = useCallback((_event: React.MouseEvent, _edge: Edge) => {
+    // Edge interactions disabled for simplified user experience
+    console.log('🚫 Edge interactions disabled for simplified user flow');
+    return;
+  }, []);
 
   return (
     <div
@@ -584,7 +789,7 @@ const GraphCanvas: React.FC = () => {
     >
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={[]} // Hide all edges for simplified user experience
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -597,12 +802,18 @@ const GraphCanvas: React.FC = () => {
         }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        connectionMode={ConnectionMode.Loose} // Disable connection handles
+        elementsSelectable={true}
+        nodesConnectable={false} // Disable node connection handles
+        nodesDraggable={true}
+        panOnDrag={true}
+        zoomOnScroll={true}
       >
         <Controls
           style={{
             right: '20px',
             left: 'auto',
-            bottom: '50px',
+            bottom: '90px',
             transform: 'translateY(-50%)',
             borderRadius: '8px',
             pointerEvents: 'all',
@@ -678,6 +889,219 @@ const GraphCanvas: React.FC = () => {
           }}
         />
       </ReactFlow>
+
+      {/* Dock for Minimized Nodes */}
+      {minimizedNodes.length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '75px',
+            left: isDrawerExpanded ? '320px' : '60px', // Move right when drawer is expanded
+            right: '30px',
+            display: 'flex',
+            gap: '2px',
+            padding: '4px 8px 0px 8px',
+            background: 'rgba(240, 242, 247, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '8px 8px 0px 0px',
+            border: '1px solid rgba(203, 213, 225, 0.6)',
+            borderBottom: 'none',
+            boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.08), 0 -1px 3px rgba(0, 0, 0, 0.05)',
+            zIndex: 1000,
+            width: 'fit-content',
+            overflowX: 'auto',
+            transition: 'left 0.3s ease-in-out', // Smooth transition for position change
+          }}
+        >
+          {minimizedNodes.map((node) => {
+            // Get category config for the node
+            const getCategoryConfig = (type: string) => {
+              switch (type) {
+                case 'dataset':
+                  return { icon: 'database', folderColor: '#3b82f6' };
+                case 'filter':
+                  return { icon: 'filter', folderColor: '#10b981' };
+                case 'field':
+                  return { icon: 'hash', folderColor: '#f59e0b' };
+                case 'sql':
+                  return { icon: 'code', folderColor: '#6366f1' };
+                case 'visualization':
+                  return { icon: 'bar-chart', folderColor: '#ec4899' };
+                case 'narrative':
+                  return { icon: 'file-text', folderColor: '#22c55e' };
+                case 'workflow':
+                  return { icon: 'workflow', folderColor: '#ef4444' };
+                default:
+                  return { icon: 'database', folderColor: '#64748b' };
+              }
+            };
+
+            const config = getCategoryConfig(String(node.data.blockType || 'default'));
+
+            return (
+              <div
+                key={node.id}
+                onClick={() => {
+                  // Restore node to canvas
+                  const nodeToRestore = {
+                    id: node.id,
+                    type: 'custom' as const,
+                    position: node.position,
+                    targetPosition: Position.Top,
+                    sourcePosition: Position.Bottom,
+                    data: node.data,
+                  };
+
+                  // Add to ReactFlow nodes
+                  setNodes((nds) => [...nds, nodeToRestore]);
+
+                  // Remove from minimized in store
+                  maximizeNode(node.id);
+
+                  // Add insight about restoration
+                  addInsight({
+                    content: `Restored ${node.data.label} to the canvas. The directory is now available for interaction.`,
+                    nodeId: node.id
+                  });
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px 12px 16px',
+                  borderRadius: '6px 6px 0px 0px',
+                  background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+                  border: '1px solid rgba(203, 213, 225, 0.8)',
+                  borderBottom: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  minWidth: '140px',
+                  maxWidth: '200px',
+                  position: 'relative',
+                  boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.05)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 -4px 8px rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)';
+                  e.currentTarget.style.transform = 'translateY(0px)';
+                  e.currentTarget.style.boxShadow = '0 -2px 4px rgba(0, 0, 0, 0.05)';
+                }}
+                title={`Click to restore ${node.data.label}`}
+              >
+                {/* Tab indicator line */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '0',
+                    left: '0',
+                    right: '0',
+                    height: '3px',
+                    background: `linear-gradient(90deg, ${config.folderColor} 0%, ${config.folderColor}cc 100%)`,
+                    borderRadius: '3px 3px 0px 0px',
+                  }}
+                />
+
+                {/* Folder icon - smaller for tab */}
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '4px',
+                    background: `linear-gradient(135deg, ${config.folderColor}15 0%, ${config.folderColor}25 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={config.folderColor}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+                  </svg>
+                </div>
+
+                {/* Tab title */}
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      lineHeight: '1.2',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {String(node.data.label || '').replace(' Block', '')}
+                  </div>
+                </div>
+
+                {/* Close button for tab */}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Remove from minimized nodes
+                    const { removeNode } = useCanvasStore.getState();
+                    removeNode(node.id);
+                  }}
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    opacity: 0.6,
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ef4444';
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.opacity = '0.6';
+                  }}
+                  title="Remove from dock"
+                >
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
