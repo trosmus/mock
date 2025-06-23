@@ -6,6 +6,7 @@ import ChatPage from './pages/ChatPage';
 import VisualizationBuilderPage from './pages/ChartBuilderPage';
 import AdminPage from './pages/AdminPage';
 import CanvasPage from './pages/CanvasPage';
+import ExplorePage from './pages/ExplorePage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/chart-builder" element={<VisualizationBuilderPage />} />
           <Route path="/canvas" element={<CanvasPage />} />
+          <Route path="/explore" element={<ExplorePage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </Layout>

@@ -17,7 +17,8 @@ import {
   Share2,
   Copy,
   Trash2,
-  Brain
+  Brain,
+  Compass
 } from 'lucide-react';
 
 const TabNavigation: React.FC = () => {
@@ -25,6 +26,7 @@ const TabNavigation: React.FC = () => {
   const location = useLocation();
 
   const tabs = [
+    { id: 'explore', label: 'Explore', path: '/explore', icon: Compass },
     { id: 'canvas', label: 'Desktop', path: '/canvas', icon: Brain },
     { id: 'workspaces', label: 'Workspaces', path: '/dashboards', icon: LayoutDashboard },
     { id: 'sql', label: 'SQL Sandbox', path: '/sql', icon: Database },
@@ -84,7 +86,7 @@ const TabNavigation: React.FC = () => {
   };
 
   const currentActions = getActionsForTab(location.pathname);
-
+ 
   return (
     <div className="bg-blue-50/30 border-b border-gray-200">
       {/* Tab Headers */}
@@ -133,7 +135,7 @@ const TabNavigation: React.FC = () => {
                   `}
                 >
                   <Icon size={16} />
-                  {tab.label}
+                  {tab.label} 
                 </button>
               );
             })}

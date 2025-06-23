@@ -45,6 +45,9 @@ interface CanvasState {
   selectedEdgeId: string | null;
   focusedPath: string[];
   
+  // Focus target for auto-zoom when navigating to canvas
+  focusTargetNodeId: string | null;
+  
   // AI Insights
   insights: Insight[];
   currentInsight: string | null;
@@ -62,6 +65,7 @@ interface CanvasState {
   setSelectedNode: (nodeId: string | null) => void;
   setSelectedEdge: (edgeId: string | null) => void;
   setFocusedPath: (path: string[]) => void;
+  setFocusTargetNode: (nodeId: string | null) => void;
   addInsight: (insight: Omit<Insight, 'id' | 'timestamp'>) => void;
   setCurrentInsight: (insight: string | null) => void;
   clearSelection: () => void;
@@ -74,6 +78,7 @@ interface CanvasState {
   minimizeNode: (nodeId: string) => void;
   maximizeNode: (nodeId: string) => void;
   removeNode: (nodeId: string) => void;
+  addNode: (node: CanvasNode) => void;
   
   // UI actions
   setDrawerExpanded: (expanded: boolean) => void;
@@ -90,6 +95,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   selectedNodeId: null,
   selectedEdgeId: null,
   focusedPath: [],
+  focusTargetNodeId: null,
   insights: [],
   currentInsight: null,
   previewModalNodeId: null,
@@ -109,6 +115,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   
   setFocusedPath: (path) => set({ focusedPath: path }),
   
+  setFocusTargetNode: (nodeId) => set({ focusTargetNodeId: nodeId }),
+  
   addInsight: (insight) => set((state) => ({
     insights: [
       ...state.insights,
@@ -125,7 +133,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   clearSelection: () => set({
     selectedNodeId: null,
     selectedEdgeId: null,
-    focusedPath: []
+    focusedPath: [],
+    focusTargetNodeId: null
   }),
   
   openPreviewModal: (nodeId) => {
@@ -166,7 +175,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   setDrawerExpanded: (expanded) => set({ isDrawerExpanded: expanded }),
   
   setNodes: (nodes) => set({ nodes }),
-  setEdges: (edges) => set({ edges })
+  setEdges: (edges) => set({ edges }),
+  
+  // Node management
+  addNode: (node) => set((state) => ({
+    nodes: [...state.nodes, node]
+  }))
 }));
 
 export type { CanvasNode, CanvasEdge, Insight }; 

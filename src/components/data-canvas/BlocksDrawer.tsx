@@ -31,15 +31,6 @@ interface BlocksDrawerProps {
 
 const blockCategories: BlockCategory[] = [
   {
-    id: 'data-series',
-    name: 'Data Series',
-    icon: <TrendingUp className="w-4 h-4" />,
-    blocks: [
-      { id: 'time-series-encounters', name: 'Time Series Encounters Block', description: 'Monthly encounter counts over time', prompt: 'Create time series analysis of encounter volumes over time. Identify seasonal patterns, trends, and anomalies in healthcare utilization. Analyze the impact of external factors on care access.', type: 'data-series' },
-      { id: 'time-series-medications', name: 'Time Series Medications Block', description: 'Medication prescription trends over time', prompt: 'Analyze medication prescribing trends over time using time series methods. Identify seasonal patterns, drug adoption curves, and the impact of clinical guidelines on prescribing behavior.', type: 'data-series' },
-    ]
-  },
-  {
     id: 'dataset',
     name: 'Dataset Blocks',
     icon: <Database className="w-4 h-4" />,
@@ -61,6 +52,7 @@ const blockCategories: BlockCategory[] = [
     blocks: [
       { id: 'age-range-filter', name: 'Age Range Filter', description: 'Filter patients by age (e.g., 18–65)', prompt: 'Apply age-based filtering to focus analysis on specific age cohorts (e.g., 18-65 working age, 65+ elderly, pediatric populations). Analyze how health outcomes and utilization patterns vary across age groups.', type: 'filter' },
       { id: 'gender-filter', name: 'Gender Filter', description: 'Filter by gender (male, female, other)', prompt: 'Filter data by gender to examine gender-specific health patterns, condition prevalence differences, and care utilization disparities between male, female, and other gender categories.', type: 'filter' },
+      { id: 'drug-class-filter', name: 'Drug Class Filter', description: 'Filter medications by therapeutic drug classes and categories', prompt: 'Filter medications by therapeutic drug classes and categories to analyze prescribing patterns for specific therapeutic areas and medication types.', type: 'filter' },
       { id: 'condition-code-filter', name: 'Condition Code Filter', description: 'Filter conditions by SNOMED-CT or ICD-10 code', prompt: 'Filter medical conditions using SNOMED-CT or ICD-10 codes. Focus analysis on specific disease categories, chronic conditions, or acute care episodes for targeted health insights.', type: 'filter' },
       { id: 'encounter-date-filter', name: 'Encounter Date Filter', description: 'Filter encounters by start or stop date', prompt: 'Apply temporal filtering to healthcare encounters. Analyze seasonal patterns, pandemic impacts, or specific time periods to understand care delivery trends and utilization changes.', type: 'filter' },
       { id: 'medication-class-filter', name: 'Medication Class Filter', description: 'Filter medications by ATC or RxNorm class (e.g., antihypertensives)', prompt: 'Filter medications by therapeutic class (ATC codes) or drug categories. Analyze prescribing patterns for specific conditions like antihypertensives, diabetes medications, or mental health drugs.', type: 'filter' },
@@ -89,6 +81,14 @@ const blockCategories: BlockCategory[] = [
     name: 'SQL/Query Blocks',
     icon: <Code className="w-4 h-4" />,
     blocks: [
+      { id: 'patient-demographics-query', name: 'Patient Demographics Query', description: 'SQL: Query patient demographics data to understand population structure', prompt: 'Query patient demographics data to understand population structure, age distributions, gender ratios, and identify key demographic patterns in the patient population.', type: 'sql' },
+      { id: 'monthly-encounters-query', name: 'Monthly Encounters Query', description: 'SQL: Query monthly encounter patterns to analyze utilization', prompt: 'Query monthly encounter patterns to analyze healthcare utilization trends, seasonal variations, and care access patterns over time.', type: 'sql' },
+      { id: 'medication-dataset-query', name: 'Medication Dataset Query', description: 'SQL: Query comprehensive medication prescription data across all patients', prompt: 'Query comprehensive medication prescription data across all patients to analyze prescribing patterns, drug utilization, and pharmaceutical trends.', type: 'sql' },
+      { id: 'prescription-frequency-analysis', name: 'Prescription Frequency Analysis', description: 'SQL: Analyze prescription frequency patterns and dosing trends', prompt: 'Analyze prescription frequency patterns and dosing trends to identify most commonly prescribed medications and usage patterns.', type: 'sql' },
+      { id: 'temporal-prescribing-trends', name: 'Temporal Prescribing Trends', description: 'SQL: Query temporal patterns in medication prescribing over time', prompt: 'Query temporal patterns in medication prescribing over time to identify seasonal trends, policy impacts, and prescribing evolution.', type: 'sql' },
+      { id: 'clinical-outcomes-overview-query', name: 'Clinical Outcomes Overview Query', description: 'SQL: Query comprehensive clinical outcomes including mortality, readmissions, and complications', prompt: 'Query comprehensive clinical outcomes data including mortality rates, readmission patterns, and complication rates to assess care quality.', type: 'sql' },
+      { id: 'quality-metrics-analysis', name: 'Quality Metrics Analysis', description: 'SQL: Analyze quality indicators across different care pathways and provider types', prompt: 'Analyze quality indicators across different care pathways and provider types to identify performance gaps and improvement opportunities.', type: 'sql' },
+      { id: 'risk-stratification-query', name: 'Risk Stratification Query', description: 'SQL: Query patient risk factors and stratify by clinical complexity', prompt: 'Query patient risk factors and stratify by clinical complexity and comorbidities to identify high-risk patient populations.', type: 'sql' },
       { id: 'count-patients', name: 'Count Patients Block', description: 'SQL: SELECT COUNT(*) FROM patients', prompt: 'Calculate total patient counts and analyze population size metrics. Break down counts by key demographics, enrollment periods, and active vs inactive patients. Provide statistical summaries and growth trends.', type: 'sql' },
       { id: 'average-age', name: 'Average Age Block', description: 'SQL: SELECT AVG(age) FROM patients', prompt: 'Calculate average patient age and analyze age-related statistics. Examine age distributions across different conditions, treatments, and outcomes to identify age-related health patterns.', type: 'sql' },
       { id: 'diagnoses-per-patient', name: 'Diagnoses per Patient Block', description: 'SQL: SELECT patient, COUNT(*) FROM conditions GROUP BY patient', prompt: 'Analyze the number of diagnoses per patient to understand disease burden, comorbidity patterns, and complexity of care. Identify patients with multiple chronic conditions.', type: 'sql' },
@@ -104,6 +104,10 @@ const blockCategories: BlockCategory[] = [
     name: 'Visualization Blocks',
     icon: <BarChart3 className="w-4 h-4" />,
     blocks: [
+      { id: 'drug-interaction-matrix', name: 'Drug Interaction Matrix', description: 'Create interaction matrix showing potential drug-drug interactions', prompt: 'Create interaction matrix visualization showing potential drug-drug interactions, severity levels, and clinical impact assessments for medication safety.', type: 'visualization' },
+      { id: 'safety-heatmap-visualization', name: 'Safety Heatmap Visualization', description: 'Generate heatmap of medication safety events and adverse reactions', prompt: 'Generate heatmap visualization of medication safety events and adverse reactions to identify risk patterns and safety concerns.', type: 'visualization' },
+      { id: 'clinical-outcomes-trends-chart', name: 'Clinical Outcomes Trends Chart', description: 'Visualize clinical outcome trends and quality improvements over time', prompt: 'Visualize clinical outcome trends and quality improvements over time to track performance and identify improvement opportunities.', type: 'visualization' },
+      { id: 'quality-performance-dashboard', name: 'Quality Performance Dashboard', description: 'Create comprehensive dashboard showing quality KPIs and outcome metrics', prompt: 'Create comprehensive dashboard showing quality KPIs and outcome metrics to monitor performance and identify areas for improvement.', type: 'visualization' },
       { id: 'population-pyramid', name: 'Population Pyramid Chart Block', description: 'Age and gender distribution of patients', prompt: 'Create a population pyramid visualization showing age and gender distribution. Analyze demographic structure, identify population imbalances, and examine age-gender health patterns.', type: 'visualization' },
       { id: 'bar-chart', name: 'Bar Chart Block', description: 'Top 10 most common conditions', prompt: 'Create a bar chart visualization showing the top 10 most common medical conditions. Analyze prevalence rates, compare across demographics, and highlight significant patterns or outliers in the data.', type: 'visualization' },
       { id: 'line-chart', name: 'Line Chart Block', description: 'Monthly encounter volume over time', prompt: 'Generate a line chart showing monthly encounter volume trends over time. Identify seasonal patterns, growth trends, and any anomalies. Correlate with external factors like flu seasons or policy changes.', type: 'visualization' },
@@ -119,6 +123,8 @@ const blockCategories: BlockCategory[] = [
     name: 'Narrative/Insight Blocks',
     icon: <FileText className="w-4 h-4" />,
     blocks: [
+      { id: 'pharmaceutical-safety-insights', name: 'Pharmaceutical Safety Insights', description: 'Generate comprehensive insights about medication safety and optimization', prompt: 'Generate comprehensive insights about medication safety and optimization opportunities, including interaction analysis, adverse event patterns, and therapeutic recommendations.', type: 'narrative' },
+      { id: 'clinical-quality-insights', name: 'Clinical Quality Insights', description: 'Generate strategic insights for improving clinical outcomes and quality', prompt: 'Generate strategic insights for improving clinical outcomes and quality metrics, identifying improvement opportunities and best practices.', type: 'narrative' },
       { id: 'demographic-summary', name: 'Demographic Summary Block', description: 'The median patient age is 44, with 53% female and 47% male', prompt: 'Generate comprehensive demographic analysis and summary insights. Examine population characteristics, identify key trends, and provide actionable insights about patient demographics and health patterns.', type: 'narrative' },
       { id: 'condition-prevalence', name: 'Condition Prevalence Insight Block', description: 'Hypertension is present in 22% of the population', prompt: 'Analyze condition prevalence rates and generate insights about disease burden in the population. Compare with national benchmarks and identify public health priorities.', type: 'narrative' },
       { id: 'medication-utilization', name: 'Medication Utilization Insight Block', description: 'Statins are the most commonly prescribed medication class', prompt: 'Examine medication utilization patterns and generate insights about prescribing trends, therapeutic choices, and medication management across different patient populations.', type: 'narrative' },
@@ -144,6 +150,15 @@ const blockCategories: BlockCategory[] = [
       { id: 'if-readmission', name: 'If Readmission Within 30 Days Then Flag Block', description: 'Identify potential quality of care issues', prompt: 'Identify 30-day readmissions using conditional logic. Analyze readmission patterns, quality indicators, and opportunities for care improvement.', type: 'workflow' },
     ]
   },
+  {
+    id: 'data-series',
+    name: 'Data Series',
+    icon: <TrendingUp className="w-4 h-4" />,
+    blocks: [
+      { id: 'time-series-encounters', name: 'Time Series Encounters Block', description: 'Monthly encounter counts over time', prompt: 'Create time series analysis of encounter volumes over time. Identify seasonal patterns, trends, and anomalies in healthcare utilization. Analyze the impact of external factors on care access.', type: 'data-series' },
+      { id: 'time-series-medications', name: 'Time Series Medications Block', description: 'Medication prescription trends over time', prompt: 'Analyze medication prescribing trends over time using time series methods. Identify seasonal patterns, drug adoption curves, and the impact of clinical guidelines on prescribing behavior.', type: 'data-series' },
+    ]
+  }
 ];
 
 // Helper function to get category-specific file colors and icons
@@ -224,7 +239,7 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
   if (dataSeries.length > 0) {
     const existingDataSeriesCategory = blockCategoriesWithSeries.find(cat => cat.id === 'data-series');
     if (existingDataSeriesCategory) {
-      // Add data series as blocks to the existing category
+      // Replace static blocks with dynamic data series blocks
       const dataSeriesBlocks: Block[] = dataSeries.map(series => ({
         id: series.id,
         name: series.name,
@@ -233,7 +248,7 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
         type: 'data-series'
       }));
       
-      existingDataSeriesCategory.blocks = [...existingDataSeriesCategory.blocks, ...dataSeriesBlocks];
+      existingDataSeriesCategory.blocks = dataSeriesBlocks; // Replace instead of append
     }
   }
 
@@ -293,7 +308,7 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
           </div>
 
           {/* Categories */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-20">
             {blockCategoriesWithSeries.map((category) => (
               <div key={category.id} className="border-b border-gray-100">
                 <button

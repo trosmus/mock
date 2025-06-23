@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, PanelRight, Bot, Brain, Search, Calculator, FileText, BarChart3, Database, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PanelRight, Bot, Brain, Search, Calculator, FileText, BarChart3, Database, Zap, TrendingUp, Users, DollarSign, Target, AlertTriangle, Lightbulb, MessageSquare, PieChart, Settings, Cpu } from 'lucide-react';
 
 interface Agent {
   id: string;
@@ -15,161 +15,103 @@ interface AgentCategory {
   name: string;
   icon: React.ReactNode;
   agents: Agent[];
+  tier: 'basic' | 'advanced';
 }
 
 const agentCategories: AgentCategory[] = [
   {
-    id: 'analysis',
-    name: 'Analysis Agents',
-    icon: <Brain className="w-4 h-4" />,
+    id: 'basic-agents',
+    name: 'Basic AI Agents',
+    icon: <Bot className="w-4 h-4" />,
+    tier: 'basic',
     agents: [
-      { 
-        id: 'data-analyst', 
-        name: 'Data Analyst Agent', 
-        description: 'Analyzes datasets and generates insights', 
-        prompt: 'I am a data analyst agent that can examine datasets, identify patterns, and generate comprehensive analytical insights.',
-        type: 'analysis',
-        category: 'dataset'
-      },
-      { 
-        id: 'statistical-analyst', 
-        name: 'Statistical Analyst Agent', 
-        description: 'Performs statistical analysis and hypothesis testing', 
-        prompt: 'I specialize in statistical analysis, hypothesis testing, and advanced statistical modeling to uncover data relationships.',
-        type: 'analysis',
-        category: 'sql'
-      },
-      { 
-        id: 'pattern-finder', 
-        name: 'Pattern Finder Agent', 
-        description: 'Identifies trends and patterns in data', 
-        prompt: 'I excel at finding hidden patterns, trends, and anomalies in complex datasets using advanced pattern recognition techniques.',
-        type: 'analysis',
-        category: 'workflow'
-      },
-    ]
-  },
-  {
-    id: 'visualization',
-    name: 'Visualization Agents',
-    icon: <BarChart3 className="w-4 h-4" />,
-    agents: [
-      { 
-        id: 'chart-creator', 
-        name: 'Chart Creator Agent', 
-        description: 'Creates various types of charts and graphs', 
-        prompt: 'I create compelling visualizations including bar charts, line graphs, scatter plots, and other chart types to represent data effectively.',
-        type: 'visualization',
-        category: 'visualization'
-      },
-      { 
-        id: 'dashboard-builder', 
-        name: 'Dashboard Builder Agent', 
-        description: 'Builds comprehensive dashboards', 
-        prompt: 'I build interactive dashboards that combine multiple visualizations to provide comprehensive views of your data.',
-        type: 'visualization',
-        category: 'visualization'
-      },
-      { 
-        id: 'infographic-designer', 
-        name: 'Infographic Designer Agent', 
-        description: 'Creates infographics and visual summaries', 
-        prompt: 'I design informative infographics and visual summaries that make complex data easy to understand at a glance.',
-        type: 'visualization',
-        category: 'narrative'
-      },
-    ]
-  },
-  {
-    id: 'processing',
-    name: 'Data Processing Agents',
-    icon: <Zap className="w-4 h-4" />,
-    agents: [
-      { 
-        id: 'data-cleaner', 
-        name: 'Data Cleaner Agent', 
-        description: 'Cleans and preprocesses data', 
-        prompt: 'I clean and preprocess data by handling missing values, removing duplicates, and standardizing formats for analysis.',
-        type: 'processing',
-        category: 'filter'
-      },
-      { 
-        id: 'data-transformer', 
-        name: 'Data Transformer Agent', 
-        description: 'Transforms and reshapes data', 
-        prompt: 'I transform data structures, aggregate values, and reshape datasets to prepare them for specific analytical needs.',
-        type: 'processing',
-        category: 'sql'
-      },
-      { 
-        id: 'feature-engineer', 
-        name: 'Feature Engineer Agent', 
-        description: 'Creates new features from existing data', 
-        prompt: 'I create new features and derived variables from existing data to enhance analytical capabilities and model performance.',
-        type: 'processing',
-        category: 'field'
-      },
-    ]
-  },
-  {
-    id: 'reporting',
-    name: 'Reporting Agents',
-    icon: <FileText className="w-4 h-4" />,
-    agents: [
-      { 
-        id: 'report-writer', 
-        name: 'Report Writer Agent', 
-        description: 'Generates comprehensive reports', 
-        prompt: 'I write detailed reports that summarize findings, provide insights, and make recommendations based on data analysis.',
-        type: 'reporting',
-        category: 'narrative'
-      },
-      { 
-        id: 'executive-summarizer', 
-        name: 'Executive Summarizer Agent', 
-        description: 'Creates executive summaries', 
-        prompt: 'I create concise executive summaries that highlight key findings and strategic insights for decision makers.',
-        type: 'reporting',
-        category: 'narrative'
-      },
-      { 
-        id: 'insight-generator', 
-        name: 'Insight Generator Agent', 
-        description: 'Generates actionable insights', 
-        prompt: 'I generate actionable insights and recommendations by analyzing data patterns and business implications.',
-        type: 'reporting',
-        category: 'narrative'
-      },
-    ]
-  },
-  {
-    id: 'query',
-    name: 'Query Agents',
-    icon: <Search className="w-4 h-4" />,
-    agents: [
-      { 
-        id: 'sql-expert', 
-        name: 'SQL Expert Agent', 
-        description: 'Writes complex SQL queries', 
-        prompt: 'I write optimized SQL queries for data extraction, aggregation, and complex analytical operations across multiple tables.',
-        type: 'query',
-        category: 'sql'
-      },
       { 
         id: 'data-explorer', 
-        name: 'Data Explorer Agent', 
-        description: 'Explores and discovers data relationships', 
-        prompt: 'I explore datasets to discover relationships, correlations, and interesting patterns that might not be immediately obvious.',
-        type: 'query',
+        name: 'Data Explorer', 
+        description: 'Automatically finds interesting patterns in your data', 
+        prompt: 'I explore your data to discover patterns, trends, and insights. I show you what\'s working, what\'s not, and create easy-to-read summaries perfect for getting started with any dataset.',
+        type: 'analysis',
         category: 'dataset'
       },
       { 
-        id: 'metric-calculator', 
-        name: 'Metric Calculator Agent', 
-        description: 'Calculates KPIs and metrics', 
-        prompt: 'I calculate key performance indicators, business metrics, and statistical measures to track performance and trends.',
+        id: 'ask-your-data', 
+        name: 'Ask Your Data', 
+        description: 'Just type questions in plain English', 
+        prompt: 'I answer your business questions in plain English. Ask me "How are we doing this quarter?" or "What are our top products?" and I\'ll give you instant answers without any complicated formulas.',
         type: 'query',
-        category: 'field'
+        category: 'narrative'
+      },
+      { 
+        id: 'chart-maker', 
+        name: 'Chart Maker', 
+        description: 'Picks the perfect chart for your information', 
+        prompt: 'I create beautiful visualizations for your data. I automatically pick the best chart type, make professional-looking graphs, and help you build dashboards that make your data look great.',
+        type: 'visualization',
+        category: 'visualization'
+      },
+      { 
+        id: 'report-writer', 
+        name: 'Report Writer', 
+        description: 'Creates polished business reports for you', 
+        prompt: 'I write professional business reports in clear language. I create summaries, schedule automatic reports, and make you look like a data expert without any technical knowledge required.',
+        type: 'reporting',
+        category: 'narrative'
+      },
+    ]
+  },
+  {
+    id: 'advanced-agents',
+    name: 'Advanced AI Agents',
+    icon: <Brain className="w-4 h-4" />,
+    tier: 'advanced',
+    agents: [
+      { 
+        id: 'predictive-analytics', 
+        name: 'Predictive Analytics Agent', 
+        description: 'Machine learning model building and forecasting', 
+        prompt: 'I build sophisticated predictive models using machine learning. I can forecast trends, predict customer behavior, identify risks, and run complex what-if scenarios for strategic planning.',
+        type: 'prediction',
+        category: 'workflow'
+      },
+      { 
+        id: 'data-integration', 
+        name: 'Data Integration Agent', 
+        description: 'Multi-source data connections and ETL pipelines', 
+        prompt: 'I connect and harmonize data from multiple sources. I handle complex ETL processes, API integrations, real-time data streaming, and ensure your data is clean and ready for analysis.',
+        type: 'integration',
+        category: 'dataset'
+      },
+      { 
+        id: 'performance-monitor', 
+        name: 'Performance Monitor Agent', 
+        description: 'Advanced KPI tracking and anomaly detection', 
+        prompt: 'I continuously monitor your business performance with advanced analytics. I track complex KPIs, detect anomalies using statistical algorithms, and provide real-time alerts for critical metrics.',
+        type: 'monitoring',
+        category: 'workflow'
+      },
+      { 
+        id: 'collaboration-agent', 
+        name: 'Collaboration Agent', 
+        description: 'Team-based analytics and workflow management', 
+        prompt: 'I facilitate advanced team collaboration on data projects. I manage workflows, version control, team permissions, and enterprise governance for complex analytics initiatives.',
+        type: 'collaboration',
+        category: 'workflow'
+      },
+      { 
+        id: 'ml-studio', 
+        name: 'Machine Learning Studio', 
+        description: 'Advanced ML model development and deployment', 
+        prompt: 'I provide a complete machine learning development environment. I help you build, train, validate, and deploy custom ML models with advanced algorithms and automated model optimization.',
+        type: 'ml-development',
+        category: 'workflow'
+      },
+      { 
+        id: 'custom-analytics', 
+        name: 'Custom Analytics Builder', 
+        description: 'Build custom analytical workflows and algorithms', 
+        prompt: 'I help you create custom analytical solutions tailored to your specific business needs. I build custom algorithms, specialized metrics, and unique analytical workflows that standard tools can\'t provide.',
+        type: 'custom-development',
+        category: 'workflow'
       },
     ]
   },
@@ -183,6 +125,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Database,
         color: '#3b82f6',
         fileColor: '#4a90e2',
+        folderColor: '#3b82f6',
         extension: 'AGENT'
       };
     case 'filter':
@@ -190,6 +133,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Zap,
         color: '#10b981',
         fileColor: '#50c878',
+        folderColor: '#10b981',
         extension: 'AGENT'
       };
     case 'field':
@@ -197,6 +141,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Calculator,
         color: '#f59e0b',
         fileColor: '#ffa500',
+        folderColor: '#f59e0b',
         extension: 'AGENT'
       };
     case 'sql':
@@ -204,6 +149,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Search,
         color: '#6366f1',
         fileColor: '#7c3aed',
+        folderColor: '#6366f1',
         extension: 'AGENT'
       };
     case 'visualization':
@@ -211,6 +157,7 @@ const getAgentFileConfig = (category: string) => {
         icon: BarChart3,
         color: '#ec4899',
         fileColor: '#e91e63',
+        folderColor: '#ec4899',
         extension: 'AGENT'
       };
     case 'narrative':
@@ -218,6 +165,7 @@ const getAgentFileConfig = (category: string) => {
         icon: FileText,
         color: '#22c55e',
         fileColor: '#4caf50',
+        folderColor: '#22c55e',
         extension: 'AGENT'
       };
     case 'workflow':
@@ -225,6 +173,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Bot,
         color: '#ef4444',
         fileColor: '#f44336',
+        folderColor: '#ef4444',
         extension: 'AGENT'
       };
     default:
@@ -232,6 +181,7 @@ const getAgentFileConfig = (category: string) => {
         icon: Bot,
         color: '#64748b',
         fileColor: '#9e9e9e',
+        folderColor: '#64748b',
         extension: 'AGENT'
       };
   }
@@ -270,7 +220,7 @@ const AgentsBar: React.FC = () => {
 
   return (
     <div
-      className={`bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
+      className={`bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out h-full ${
         isExpanded ? 'w-80' : 'w-12'
       }`}
     >
@@ -310,20 +260,30 @@ const AgentsBar: React.FC = () => {
           </div>
 
           {/* Categories */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 pb-24 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
             {agentCategories.map((category) => (
-              <div key={category.id} className="border-b border-gray-100">
+              <div key={category.id} className="border-none border-gray-100">
                 <button
                   onClick={() => toggleCategory(category.id)}
-                  className={`w-full p-3 flex items-center justify-between transition-colors border-none outline-none focus:outline-none ${
+                  className={`w-full rounded-none p-3 flex items-center justify-between transition-colors border-none outline-none focus:outline-none ${
                     expandedCategories.has(category.id) 
-                      ? 'bg-purple-50 hover:bg-purple-100' 
+                      ? category.tier === 'basic' 
+                        ? 'bg-green-50 hover:bg-green-100' 
+                        : 'bg-red-50 hover:bg-red-100'
                       : 'hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center space-x-2">
-                    {category.icon}
-                    <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                    <div className={`p-1 rounded-full ${
+                      category.tier === 'basic' 
+                        ? 'bg-green-100 text-green-600' 
+                        : 'bg-red-100 text-red-600'
+                    }`}>
+                      {category.icon}
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                    </div>
                   </div>
                   <ChevronRight
                     className={`w-4 h-4 text-gray-400 transition-transform ${
@@ -333,13 +293,13 @@ const AgentsBar: React.FC = () => {
                 </button>
 
                 {expandedCategories.has(category.id) && (
-                  <div className="pb-3 px-3">
+                  <div className="pt-3 pb-3 px-3">
                     {/* Grid container for agents */}
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-                        gap: '12px',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: '16px',
                         justifyItems: 'center',
                       }}
                     >
@@ -348,11 +308,13 @@ const AgentsBar: React.FC = () => {
                           key={agent.id}
                           draggable
                           onDragStart={(e) => handleDragStart(e, agent)}
-                          className="cursor-grab hover:scale-[1.05] transition-all duration-200"
+                          className="cursor-grab hover:scale-[1.05] transition-all duration-200 p-3 rounded-lg border-2"
                           style={{
                             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
-                            width: '80px',
+                            width: '120px',
                             textAlign: 'center',
+                            borderColor: getAgentFileConfig(agent.category).folderColor,
+                            backgroundColor: `${getAgentFileConfig(agent.category).folderColor}08`,
                           }}
                           title={agent.description}
                         >
@@ -360,17 +322,17 @@ const AgentsBar: React.FC = () => {
                           <div
                             style={{
                               position: 'relative',
-                              width: '48px',
-                              height: '48px',
-                              margin: '12px auto 12px auto',
+                              width: '56px',
+                              height: '56px',
+                              margin: '12px auto 16px auto',
                             }}
                           >
                             {/* Circular background */}
                             <div
                               style={{
                                 position: 'absolute',
-                                width: '48px',
-                                height: '48px',
+                                width: '56px',
+                                height: '56px',
                                 background: `linear-gradient(135deg, ${getAgentFileConfig(agent.category).fileColor} 0%, ${getAgentFileConfig(agent.category).fileColor}dd 100%)`,
                                 borderRadius: '50%',
                                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
@@ -382,7 +344,7 @@ const AgentsBar: React.FC = () => {
                             >
                               {/* Main agent icon */}
                               {React.createElement(getAgentFileConfig(agent.category).icon, {
-                                size: 20,
+                                size: 24,
                                 color: 'white',
                                 strokeWidth: 2
                               })}
@@ -394,20 +356,24 @@ const AgentsBar: React.FC = () => {
                                 position: 'absolute',
                                 bottom: '-2px',
                                 right: '-2px',
-                                width: '18px',
-                                height: '18px',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                                width: '20px',
+                                height: '20px',
+                                background: category.tier === 'basic' 
+                                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                                  : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                 borderRadius: '50%',
                                 border: '2px solid white',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                boxShadow: '0 2px 6px rgba(139, 92, 246, 0.3)',
+                                boxShadow: category.tier === 'basic' 
+                                  ? '0 2px 6px rgba(16, 185, 129, 0.3)' 
+                                  : '0 2px 6px rgba(239, 68, 68, 0.3)',
                               }}
                             >
                               <svg
-                                width="8"
-                                height="8"
+                                width="10"
+                                height="10"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="white"
@@ -428,21 +394,21 @@ const AgentsBar: React.FC = () => {
                           {/* Agent Information */}
                           <div
                             style={{
-                              fontSize: '10px',
+                              fontSize: '11px',
                               fontWeight: '500',
                               color: '#1d1d1f',
                               lineHeight: '1.2',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
-                              marginBottom: '2px',
+                              marginBottom: '4px',
                             }}
                           >
                             {agent.name.replace(' Agent', '')}
                           </div>
                           <div
                             style={{
-                              fontSize: '8px',
+                              fontSize: '9px',
                               color: '#a1a1a6',
                               fontWeight: '400',
                               textTransform: 'uppercase',

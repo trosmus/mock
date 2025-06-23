@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -8,6 +8,8 @@ import {
   BackgroundVariant,
   Position,
   ConnectionMode,
+  useReactFlow,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import type { Node, Edge, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -81,16 +83,16 @@ const futuristicStyles = `
 
 // Sample data based on requirements - updated to look like agent-created nodes
 const initialNodes: Node[] = [
-  // Data Analyst Agent Node
+  // Data Explorer Agent Node
   {
-    id: 'data-analyst-1',
+    id: 'data-explorer-1',
     type: 'custom',
     position: { x: 100, y: 100 },
     data: {
-      id: 'data-analyst-1',
-      label: 'Data Analyst',
-      description: 'Analyzes datasets and generates insights',
-      prompt: 'I am a data analyst agent that can examine datasets, identify patterns, and generate comprehensive analytical insights.',
+      id: 'data-explorer-1',
+      label: 'Data Explorer',
+      description: 'Automatically finds interesting patterns in your data',
+      prompt: 'I explore your data to discover patterns, trends, and insights. I show you what\'s working, what\'s not, and create easy-to-read summaries perfect for getting started with any dataset.',
       blockType: 'dataset',
       category: 'dataset',
       isAgent: true,
@@ -116,16 +118,16 @@ const initialNodes: Node[] = [
       ]
     },
   },
-  // Chart Creator Agent Node
+  // Chart Maker Agent Node
   {
-    id: 'chart-creator-1',
+    id: 'chart-maker-1',
     type: 'custom',
     position: { x: 400, y: 100 },
     data: {
-      id: 'chart-creator-1',
-      label: 'Chart Creator',
-      description: 'Creates various types of charts and graphs',
-      prompt: 'I create compelling visualizations including bar charts, line graphs, scatter plots, and other chart types to represent data effectively.',
+      id: 'chart-maker-1',
+      label: 'Chart Maker',
+      description: 'Picks the perfect chart for your information',
+      prompt: 'I create beautiful visualizations for your data. I automatically pick the best chart type, make professional-looking graphs, and help you build dashboards that make your data look great.',
       blockType: 'visualization',
       category: 'visualization',
       isAgent: true,
@@ -157,18 +159,18 @@ const initialNodes: Node[] = [
       ]
     },
   },
-  // SQL Expert Agent Node
+  // Ask Your Data Agent Node
   {
-    id: 'sql-expert-1',
+    id: 'ask-your-data-1',
     type: 'custom',
     position: { x: 100, y: 350 },
     data: {
-      id: 'sql-expert-1',
-      label: 'SQL Expert',
-      description: 'Writes complex SQL queries',
-      prompt: 'I write optimized SQL queries for data extraction, aggregation, and complex analytical operations across multiple tables.',
-      blockType: 'sql',
-      category: 'sql',
+      id: 'ask-your-data-1',
+      label: 'Ask Your Data',
+      description: 'Just type questions in plain English',
+      prompt: 'I answer your business questions in plain English. Ask me "How are we doing this quarter?" or "What are our top products?" and I\'ll give you instant answers without any complicated formulas.',
+      blockType: 'narrative',
+      category: 'narrative',
       isAgent: true,
       combinedBlocks: [
         {
@@ -443,7 +445,16 @@ const edgeTypes = {
 };
 
 const GraphCanvas: React.FC = () => {
+  return (
+    <ReactFlowProvider>
+      <ReactFlowWrapper />
+    </ReactFlowProvider>
+  );
+};
+
+const ReactFlowWrapper: React.FC = () => {
   console.log('🌐 GraphCanvas render');
+  const reactFlowInstance = useReactFlow();
 
   const {
     selectedNodeId,
@@ -455,8 +466,73 @@ const GraphCanvas: React.FC = () => {
     maximizeNode,
     nodes: storeNodes,
     setNodes: setStoreNodes,
-    isDrawerExpanded
+    isDrawerExpanded,
+    focusTargetNodeId,
+    setFocusTargetNode
   } = useCanvasStore();
+
+  // Apply layout to initial data and combine with store nodes
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
+    console.log('📐 Layout calculation memoization recalculated');
+    
+    // Combine initial nodes with store nodes
+    const allNodes = storeNodes.length > 0 ? [
+      ...initialNodes,
+      ...storeNodes.map(storeNode => ({
+        id: storeNode.id,
+        type: storeNode.type,
+        position: storeNode.position,
+        data: storeNode.data
+      }))
+    ] : initialNodes;
+    
+    // Remove duplicates by id
+    const uniqueNodes = allNodes.filter((node, index, self) => 
+      index === self.findIndex(n => n.id === node.id)
+    );
+    
+    return getLayoutedElements(uniqueNodes, initialEdges);
+  }, [storeNodes]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [, , onEdgesChange] = useEdgesState(layoutedEdges); // Keep edges state but don't use the values
+
+  // Auto-zoom to newly added node from Explorer
+  useEffect(() => {
+    if (focusTargetNodeId && reactFlowInstance) {
+      // Small delay to ensure node is rendered
+      const timer = setTimeout(() => {
+        try {
+          // Select the node
+          setSelectedNode(focusTargetNodeId);
+          
+          // Check if the node exists in the current nodes
+          const targetNode = nodes.find(n => n.id === focusTargetNodeId);
+          if (targetNode) {
+            // Zoom to the node with animation
+            reactFlowInstance.fitView({
+              nodes: [{ id: focusTargetNodeId }],
+              duration: 800,
+              padding: 0.3,
+              minZoom: 0.8,
+              maxZoom: 1.2,
+            });
+            
+            console.log(`🎯 Auto-focused on node: ${focusTargetNodeId}`);
+          } else {
+            console.warn(`⚠️ Target node ${focusTargetNodeId} not found in current nodes`);
+          }
+        } catch (error) {
+          console.error('❌ Error during auto-zoom:', error);
+        } finally {
+          // Always clear the focus target
+          setFocusTargetNode(null);
+        }
+      }, 500); // Increased delay to ensure node is fully rendered
+      
+      return () => clearTimeout(timer);
+    }
+  }, [focusTargetNodeId, reactFlowInstance, setSelectedNode, setFocusTargetNode, nodes]);
 
   // Inject styles only once
   useEffect(() => {
@@ -480,15 +556,6 @@ const GraphCanvas: React.FC = () => {
     }
   }, []);
 
-  // Apply layout to initial data
-  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
-    console.log('📐 Layout calculation memoization recalculated');
-    return getLayoutedElements(initialNodes, initialEdges);
-  }, []);
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [, , onEdgesChange] = useEdgesState(layoutedEdges); // Keep edges state but don't use the values
-
   // Sync store nodes with local state on mount
   useEffect(() => {
     if (storeNodes.length === 0) {
@@ -504,13 +571,20 @@ const GraphCanvas: React.FC = () => {
           prompt: node.data.prompt as string,
           blockType: node.data.blockType as string,
           category: node.data.category as string,
-          combinedBlocks: node.data.combinedBlocks as any[]
+          combinedBlocks: node.data.combinedBlocks as any[],
+          isAgent: node.data.isAgent as boolean
         }
       })));
     }
   }, [storeNodes.length, layoutedNodes, setStoreNodes]);
 
-  // Update store when local nodes change
+  // Force re-render when store nodes change (for nodes added from Explorer)
+  const [renderKey, setRenderKey] = React.useState(0);
+  useEffect(() => {
+    setRenderKey(prev => prev + 1);
+  }, [storeNodes.length]);
+
+  // Update store when local nodes change (position updates, etc.)
   useEffect(() => {
     if (nodes.length > 0) {
       setStoreNodes(nodes.map(node => ({
@@ -524,7 +598,8 @@ const GraphCanvas: React.FC = () => {
           prompt: node.data.prompt as string,
           blockType: node.data.blockType as string,
           category: node.data.category as string,
-          combinedBlocks: node.data.combinedBlocks as any[]
+          combinedBlocks: node.data.combinedBlocks as any[],
+          isAgent: node.data.isAgent as boolean
         }
       })));
     }
@@ -821,64 +896,6 @@ const GraphCanvas: React.FC = () => {
           }}
           className="futuristic-controls"
         />
-        {/*<MiniMap*/}
-        {/*  nodeColor={(node) => {*/}
-        {/*    const blockType = String(node.data?.blockType || 'default');*/}
-        {/*    if (selectedNodeId === node.id) {*/}
-        {/*      // Return darker version of category color when selected*/}
-        {/*      switch (blockType) {*/}
-        {/*        case 'dataset': return '#1e40af';*/}
-        {/*        case 'filter': return '#047857';*/}
-        {/*        case 'field': return '#d97706';*/}
-        {/*        case 'sql': return '#4338ca';*/}
-        {/*        case 'visualization': return '#be185d';*/}
-        {/*        case 'narrative': return '#15803d';*/}
-        {/*        case 'workflow': return '#dc2626';*/}
-        {/*        default: return '#1e40af';*/}
-        {/*      }*/}
-        {/*    }*/}
-        {/*    // Return main category color when not selected*/}
-        {/*    switch (blockType) {*/}
-        {/*      case 'dataset': return '#3b82f6';*/}
-        {/*      case 'filter': return '#10b981';*/}
-        {/*      case 'field': return '#f59e0b';*/}
-        {/*      case 'sql': return '#6366f1';*/}
-        {/*      case 'visualization': return '#ec4899';*/}
-        {/*      case 'narrative': return '#22c55e';*/}
-        {/*      case 'workflow': return '#ef4444';*/}
-        {/*      default: return '#64748b';*/}
-        {/*    }*/}
-        {/*  }}*/}
-        {/*  nodeStrokeColor={(node) => {*/}
-        {/*    const blockType = String(node.data?.blockType || 'default');*/}
-        {/*    // Always use darker stroke for definition*/}
-        {/*    switch (blockType) {*/}
-        {/*      case 'dataset': return '#1e40af';*/}
-        {/*      case 'filter': return '#047857';*/}
-        {/*      case 'field': return '#d97706';*/}
-        {/*      case 'sql': return '#4338ca';*/}
-        {/*      case 'visualization': return '#be185d';*/}
-        {/*      case 'narrative': return '#15803d';*/}
-        {/*      case 'workflow': return '#dc2626';*/}
-        {/*      default: return '#475569';*/}
-        {/*    }*/}
-        {/*  }}*/}
-        {/*  nodeStrokeWidth={2}*/}
-        {/*  maskColor="rgba(241, 245, 249, 0.85)"*/}
-        {/*  position="top-right"*/}
-        {/*  pannable*/}
-        {/*  style={{*/}
-        {/*    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.9) 100%)',*/}
-        {/*    border: '3px solid #3b82f6',*/}
-        {/*    borderRadius: '12px',*/}
-        {/*    backdropFilter: 'blur(15px)',*/}
-        {/*    boxShadow: '0 10px 25px rgba(59, 130, 246, 0.2), 0 4px 15px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',*/}
-        {/*    transform: 'scale(1.5)',*/}
-        {/*    transformOrigin: 'top right',*/}
-        {/*    outline: '2px solid rgba(59, 130, 246, 0.6)',*/}
-        {/*    outlineOffset: '3px',*/}
-        {/*  }}*/}
-        {/*/>*/}
         <Background
           variant={BackgroundVariant.Lines}
           gap={50}
