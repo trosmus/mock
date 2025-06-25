@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Compass, 
-  Route, 
-  BarChart3, 
-  TrendingUp, 
+import {
+  ArrowLeft,
+  Compass,
+  Route,
+  BarChart3,
+  TrendingUp,
   FileText,
   Users,
   ChevronRight,
@@ -97,14 +97,14 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
         ]
       }
     ];
-    
+
     return steps[stepIndex] || null;
   };
 
   const getAlternativesForStep = (stepIndex: number): string[] => {
     const stepData = getBuilderStepData(stepIndex);
     if (!stepData) return [];
-    
+
     // Return the other 3 options that weren't selected
     return stepData.options.slice(1).map(option => option.label);
   };
@@ -131,7 +131,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
           </div>
           <div className="flex gap-1">
             {[0,1,2,3,4].map(i => (
-              <div 
+              <div
                 key={i}
                 className={`w-2 h-2 rounded-full ${i <= currentBuilderStep ? 'bg-blue-600' : 'bg-gray-300'}`}
               />
@@ -161,12 +161,12 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                     {!isLast && (
                       <div className="absolute left-6 top-20 w-0.5 h-8 bg-gradient-to-b from-blue-300 to-blue-200" />
                     )}
-                    
+
                     {/* Flow arrow */}
                     {!isLast && (
                       <div className="absolute left-5 top-24 w-2 h-2 transform rotate-45 bg-blue-300" />
                     )}
-                    
+
                     {/* Completed step card */}
                     <div className="flex gap-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       {/* Step indicator */}
@@ -183,7 +183,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-3">
@@ -193,7 +193,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                             Selected
                           </div>
                         </div>
-                        
+
                         <p className="text-gray-600 mb-4">{step.description}</p>
 
                         {/* Show the 4 options with selected one highlighted */}
@@ -257,7 +257,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                           {stepVisualizations[index] && (
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                               <h5 className="font-semibold text-gray-900 mb-3">{stepVisualizations[index].title}</h5>
-                              
+
                               {stepVisualizations[index].type === 'text' && (
                                 <div className="text-sm text-gray-700 whitespace-pre-line">
                                   {stepVisualizations[index].content}
@@ -272,9 +272,9 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                                       <div key={i} className="flex items-center gap-3">
                                         <div className="w-20 text-xs text-gray-600">{label}</div>
                                         <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
-                                          <div 
+                                          <div
                                             className="h-4 rounded-full flex items-center justify-end pr-2"
-                                            style={{ 
+                                            style={{
                                               width: `${(stepVisualizations[index].data.values[i] / Math.max(...stepVisualizations[index].data.values)) * 100}%`,
                                               backgroundColor: stepVisualizations[index].data.colors[i]
                                             }}
@@ -302,7 +302,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                                         <div className="flex items-center gap-2 mt-1">
                                           <div className="text-xs text-gray-500">Confidence:</div>
                                           <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                            <div 
+                                            <div
                                               className="h-2 bg-green-500 rounded-full"
                                               style={{ width: `${insight.confidence}%` }}
                                             />
@@ -339,7 +339,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                       <div className="absolute left-5 -top-4 w-2 h-2 transform rotate-45 bg-orange-300" />
                     </>
                   )}
-                  
+
                   {/* Current question card */}
                   <div className="flex gap-6 bg-white rounded-xl shadow-lg border-2 border-orange-400 p-6">
                     {/* Step indicator */}
@@ -356,7 +356,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="mb-4">
@@ -406,7 +406,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                   {/* Connection line from last step */}
                   <div className="absolute left-6 -top-8 w-0.5 h-8 bg-gradient-to-b from-blue-200 to-green-300" />
                   <div className="absolute left-5 -top-4 w-2 h-2 transform rotate-45 bg-green-300" />
-                  
+
                   <div className="flex gap-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-lg border-2 border-green-400 p-6">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3 bg-green-600">
@@ -416,13 +416,13 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                         <span className="text-xs font-medium text-gray-500">Complete</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Custom Path is Ready!</h3>
                       <p className="text-gray-600 mb-4">
                         You've built a personalized exploration path with {builderChoices.length} analytical steps.
                       </p>
-                      
+
                       <div className="flex gap-3">
                         <button
                           onClick={onGenerateFinalAnalysis}
@@ -464,7 +464,7 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
                   {/* Connection line */}
                   <div className="absolute left-6 -top-8 w-0.5 h-8 bg-gradient-to-b from-green-300 to-purple-300" />
                   <div className="absolute left-5 -top-4 w-2 h-2 transform rotate-45 bg-purple-300" />
-                  
+
                   <div className="bg-white rounded-xl shadow-xl border-2 border-purple-400 overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
@@ -606,4 +606,4 @@ const PathBuilderView: React.FC<PathBuilderViewProps> = ({
   );
 };
 
-export default PathBuilderView; 
+export default PathBuilderView;

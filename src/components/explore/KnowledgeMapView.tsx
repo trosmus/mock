@@ -1,12 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import cytoscape from 'cytoscape';
-import { 
-  Compass, 
-  Route, 
-  ZoomIn, 
-  ZoomOut, 
+import {
+  Compass,
+  Route,
+  ZoomIn,
+  ZoomOut,
   RotateCcw,
-  Database,
   Users,
   Monitor
 } from 'lucide-react';
@@ -35,11 +34,9 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
   explorationPath,
   selectedNodeId,
   onShowPaths,
-  onSelectPath,
   onExplorePath,
   onNodeSelect,
   pathToHighlight,
-  onShowMapWithPath,
   onShowMap,
   onAddPathToDesktop
 }) => {
@@ -51,8 +48,8 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
     if (containerRef.current && !cyRef.current) {
       // Create nodes and edges for cytoscape
       const nodes = mindMapData.map(node => ({
-        data: { 
-          id: node.id, 
+        data: {
+          id: node.id,
           label: node.label,
           type: node.type,
           description: node.description || '',
@@ -63,9 +60,9 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
       }));
 
       const edges = mindMapConnections.map(connection => ({
-        data: { 
-          id: `${connection.source}-${connection.target}`, 
-          source: connection.source, 
+        data: {
+          id: `${connection.source}-${connection.target}`,
+          source: connection.source,
           target: connection.target,
           pathId: connection.pathId
         },
@@ -75,9 +72,10 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
       cyRef.current = cytoscape({
         container: containerRef.current,
         elements: [...nodes, ...edges],
+        // @ts-ignore
         style: cytoscapeStyles,
         layout: cytoscapeLayout,
-        
+
         // User interaction settings
         userZoomingEnabled: true,
         userPanningEnabled: true,
@@ -88,7 +86,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         autolock: false,
         autoungrabify: false,
         autounselectify: false,
-        
+
         // Zoom settings
         minZoom: 0.1,
         maxZoom: 3.0,
@@ -99,26 +97,26 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
       cyRef.current.on('tap', 'node', (evt) => {
         const node = evt.target;
         const nodeData = node.data();
-        
+
         // Add to exploration path (only for non-alternative nodes)
         if (nodeData.type !== 'alternative') {
           onNodeSelect(nodeData.id);
         }
-        
+
         // Clear previous selections and alternatives (but preserve path highlighting if from auto-highlight)
         cyRef.current?.elements().removeClass('selected visible');
-        
+
         // Select the clicked node
         node.addClass('selected');
-        
+
         // Highlight the entire path if this is a path node (manual click)
         if (nodeData.type === 'path1' || nodeData.type === 'path2' || nodeData.type === 'path3' || nodeData.type === 'hub') {
           const pathType = nodeData.type === 'hub' ? 'hub' : nodeData.type;
-          
+
           // Only clear and re-add path highlighting if this is a manual click (not auto-highlight)
           if (!pathToHighlight) {
             cyRef.current?.elements().removeClass('path-highlighted');
-            
+
             // Get all nodes in the same path
             const pathNodes = cyRef.current?.nodes().filter(n => {
               const nData = n.data();
@@ -127,22 +125,22 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
               }
               return nData.type === pathType;
             });
-            
+
             // Get all edges connecting nodes in this path
             const pathEdges = cyRef.current?.edges().filter(e => {
               const edgeData = e.data();
               if (pathType === 'hub') {
                 return false; // Hub doesn't have path edges
               }
-              
+
               // Check if edge connects nodes in the same path
               const sourceNode = cyRef.current?.getElementById(edgeData.source);
               const targetNode = cyRef.current?.getElementById(edgeData.target);
-              
+
               if (sourceNode && targetNode) {
                 const sourceType = sourceNode.data('type');
                 const targetType = targetNode.data('type');
-                
+
                 // Include edges that connect hub to path or within the same path
                 return (sourceType === 'hub' && targetType === pathType) ||
                        (sourceType === pathType && targetType === pathType) ||
@@ -150,7 +148,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
               }
               return false;
             });
-            
+
             // Highlight path nodes and edges
             if (pathNodes) {
               pathNodes.addClass('path-highlighted');
@@ -160,13 +158,13 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
             }
           }
         }
-        
+
         // Show alternative options for this node
         const alternativeNodes = cyRef.current?.nodes().filter(n => n.data('parentId') === nodeData.id);
-        const alternativeEdges = cyRef.current?.edges().filter(e => 
+        const alternativeEdges = cyRef.current?.edges().filter(e =>
           e.data('source') === nodeData.id && e.data('pathId') === 'alternative'
         );
-        
+
         // Make alternative nodes and edges visible
         if (alternativeNodes && alternativeNodes.length > 0) {
           alternativeNodes.addClass('visible');
@@ -174,7 +172,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         if (alternativeEdges && alternativeEdges.length > 0) {
           alternativeEdges.addClass('visible');
         }
-        
+
         // Don't auto-center to prevent map jumping - let users control the view manually
       });
 
@@ -212,10 +210,10 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
       // Small delay to ensure cytoscape is fully initialized
       setTimeout(() => {
         if (!cyRef.current) return;
-        
+
         // Clear previous selections and highlighting
         cyRef.current.elements().removeClass('selected visible path-highlighted');
-        
+
         // Determine path type from the pathToHighlight
         let pathType = '';
         if (pathToHighlight.id === 'demographics-utilization') {
@@ -225,24 +223,24 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         } else if (pathToHighlight.id === 'clinical-outcomes') {
           pathType = 'path3';
         }
-        
+
         if (pathType) {
           // Get all nodes in the path
           const pathNodes = cyRef.current.nodes().filter(n => {
             const nData = n.data();
             return nData.type === pathType || nData.type === 'hub';
           });
-          
+
           // Get all edges connecting nodes in this path
           const pathEdges = cyRef.current.edges().filter(e => {
             const edgeData = e.data();
             const sourceNode = cyRef.current?.getElementById(edgeData.source);
             const targetNode = cyRef.current?.getElementById(edgeData.target);
-            
+
             if (sourceNode && targetNode) {
               const sourceType = sourceNode.data('type');
               const targetType = targetNode.data('type');
-              
+
               // Include edges that connect hub to path or within the same path
               return (sourceType === 'hub' && targetType === pathType) ||
                      (sourceType === pathType && targetType === pathType) ||
@@ -250,7 +248,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
             }
             return false;
           });
-          
+
           // Highlight path nodes and edges
           if (pathNodes) {
             pathNodes.addClass('path-highlighted');
@@ -258,7 +256,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
           if (pathEdges) {
             pathEdges.addClass('path-highlighted');
           }
-          
+
           // Select the last node if selectedNodeId is provided
           if (selectedNodeId) {
             const selectedNode = cyRef.current.getElementById(selectedNodeId);
@@ -266,14 +264,14 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
               selectedNode.addClass('selected');
               // Also call the onNodeSelect to update the parent state
               onNodeSelect(selectedNodeId);
-              
+
               // Show alternative options for the selected node (same logic as click handler)
               const nodeData = selectedNode.data();
               const alternativeNodes = cyRef.current?.nodes().filter(n => n.data('parentId') === nodeData.id);
-              const alternativeEdges = cyRef.current?.edges().filter(e => 
+              const alternativeEdges = cyRef.current?.edges().filter(e =>
                 e.data('source') === nodeData.id && e.data('pathId') === 'alternative'
               );
-              
+
               // Make alternative nodes and edges visible
               if (alternativeNodes && alternativeNodes.length > 0) {
                 alternativeNodes.addClass('visible');
@@ -301,10 +299,10 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
   // Handle legend path highlighting
   const handleLegendPathClick = (pathType: string) => {
     if (!cyRef.current) return;
-    
+
     // Clear previous selections and highlighting
     cyRef.current.elements().removeClass('selected visible path-highlighted');
-    
+
     if (pathType === 'hub') {
       // Highlight just the hub
       const hubNode = cyRef.current.getElementById('patients-dataset');
@@ -317,17 +315,17 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         const nData = n.data();
         return nData.type === pathType || nData.type === 'hub';
       });
-      
+
       // Get all edges connecting nodes in this path
       const pathEdges = cyRef.current.edges().filter(e => {
         const edgeData = e.data();
         const sourceNode = cyRef.current?.getElementById(edgeData.source);
         const targetNode = cyRef.current?.getElementById(edgeData.target);
-        
+
         if (sourceNode && targetNode) {
           const sourceType = sourceNode.data('type');
           const targetType = targetNode.data('type');
-          
+
           // Include edges that connect hub to path or within the same path
           return (sourceType === 'hub' && targetType === pathType) ||
                  (sourceType === pathType && targetType === pathType) ||
@@ -335,7 +333,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         }
         return false;
       });
-      
+
       // Highlight path nodes and edges
       if (pathNodes) {
         pathNodes.addClass('path-highlighted');
@@ -344,7 +342,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         pathEdges.addClass('path-highlighted');
       }
     }
-    
+
     // Clear any existing pathToHighlight state
     onShowMap();
   };
@@ -392,7 +390,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
       <div className="flex-1 relative">
         {/* Cytoscape container */}
         <div ref={containerRef} className="w-full h-full" />
-        
+
         {/* Zoom controls */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 p-2">
           <button
@@ -427,7 +425,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
                 onClick={() => handleLegendPathClick('path1')}
                 className="flex-1 flex items-center gap-2 text-left p-2 rounded hover:bg-gray-50 transition-colors"
               >
-                <div 
+                <div
                   className="w-4 h-4 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: '#3b82f6' }}
                 >
@@ -451,7 +449,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
                 onClick={() => handleLegendPathClick('path2')}
                 className="flex-1 flex items-center gap-2 text-left p-2 rounded hover:bg-gray-50 transition-colors"
               >
-                <div 
+                <div
                   className="w-4 h-4 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: '#10b981' }}
                 >
@@ -475,7 +473,7 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
                 onClick={() => handleLegendPathClick('path3')}
                 className="flex-1 flex items-center gap-2 text-left p-2 rounded hover:bg-gray-50 transition-colors"
               >
-                <div 
+                <div
                   className="w-4 h-4 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: '#ef4444' }}
                 >
@@ -506,4 +504,4 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
   );
 };
 
-export default KnowledgeMapView; 
+export default KnowledgeMapView;

@@ -1,16 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Compass, 
-  Route, 
-  Play, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Play,
   Monitor,
-  TrendingUp,
-  BarChart3,
-  Users,
-  Calculator
 } from 'lucide-react';
 import DataInsightsSummary from '../DataInsightsSummary';
 
@@ -45,7 +40,7 @@ const PathsListView: React.FC<PathsListViewProps> = ({
 
     checkScrollNeeded();
     window.addEventListener('resize', checkScrollNeeded);
-    
+
     return () => window.removeEventListener('resize', checkScrollNeeded);
   }, [explorationPaths]);
 
@@ -114,7 +109,7 @@ const PathsListView: React.FC<PathsListViewProps> = ({
                   Ready to explore your healthcare data?
                 </h2>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Ask our AI anything about your data to get instant insights, or browse through our guided analysis paths 
+                  Ask our AI anything about your data to get instant insights, or browse through our guided analysis paths
                   designed specifically for healthcare datasets.
                 </p>
               </motion.div>
@@ -146,7 +141,7 @@ const PathsListView: React.FC<PathsListViewProps> = ({
                         <textarea
                           className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                           rows={6}
-                          placeholder="Ask me anything about your healthcare data... 
+                          placeholder="Ask me anything about your healthcare data...
 
 Examples:
 • What are the cost trends for patients over 65?
@@ -199,7 +194,7 @@ Examples:
                   Or follow a guided analysis path
                 </h2>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  These pre-built workflows are designed to answer specific business questions about your healthcare data, 
+                  These pre-built workflows are designed to answer specific business questions about your healthcare data,
                   taking you step-by-step through proven analytical approaches.
                 </p>
               </motion.div>
@@ -253,7 +248,7 @@ Examples:
                         onClick={() => onSelectPath(path)}
                       >
                         {/* Header */}
-                        <div 
+                        <div
                           className="p-6 text-white relative overflow-hidden group-hover:brightness-110 transition-all duration-300"
                           style={{ backgroundColor: path.color }}
                         >
@@ -286,7 +281,7 @@ Examples:
                             <div className="space-y-1">
                               {path.steps.slice(0, 3).map((step: any, stepIndex: number) => (
                                 <div key={step.id} className="flex items-center gap-2 text-sm text-gray-600">
-                                  <div 
+                                  <div
                                     className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
                                     style={{ backgroundColor: path.color }}
                                   >
@@ -372,4 +367,4 @@ Examples:
   );
 };
 
-export default PathsListView; 
+export default PathsListView;

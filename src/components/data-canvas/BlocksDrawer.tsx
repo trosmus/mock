@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, PanelLeft, Database, Filter, Hash, Code, BarChart3, FileText, Workflow, TrendingUp, File } from 'lucide-react';
 import { useCanvasStore } from '../../state/canvasStore';
 
@@ -247,7 +247,7 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
         prompt: `Analyze this ${series.chartType} data series: ${series.name}. Examine patterns, trends, and insights from the ${series.sourceWidget} visualization.`,
         type: 'data-series'
       }));
-      
+
       existingDataSeriesCategory.blocks = dataSeriesBlocks; // Replace instead of append
     }
   }
@@ -268,7 +268,7 @@ const BlocksDrawer: React.FC<BlocksDrawerProps> = ({ dataSeries }) => {
   };
 
   return (
-    <div 
+    <div
       className={`bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out shadow-lg ${
         isDrawerExpanded ? 'w-80' : 'w-12'
       }`}

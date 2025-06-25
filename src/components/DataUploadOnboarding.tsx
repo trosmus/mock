@@ -1,15 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Database, 
-  Upload, 
-  BarChart3, 
-  Sparkles, 
+import {
+  Database,
+  Upload,
+  BarChart3,
   AlertCircle,
   CheckCircle,
-  FileSpreadsheet,
-  FileJson,
-  FileText
 } from 'lucide-react';
 import { useAppStore } from '../stores/useAppStore';
 
@@ -27,9 +23,7 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
   const processFile = async (file: File) => {
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const fileType = file.name.split('.').pop()?.toLowerCase() || 'unknown';
-    
+
     // Create new dataset and add to store
     const newDataset = {
       id: `dataset-${Date.now()}`,
@@ -55,7 +49,7 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
       }],
       lastUpdated: new Date()
     };
-    
+
     setDatasets([...datasets, newDataset]);
     localStorage.setItem('hasUploadedData', 'true');
   };
@@ -75,7 +69,7 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
     e.preventDefault();
     setIsDragOver(false);
     setUploadError(null);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       await handleFileUpload(files[0]);
@@ -92,11 +86,11 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true);
     setUploadError(null);
-    
+
     try {
       await processFile(file);
       setUploadSuccess(true);
-      
+
       // Redirect to main explore page after a brief success message
       setTimeout(() => {
         onComplete();
@@ -175,14 +169,14 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-transparent to-purple-50/20 opacity-60"></div>
               <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-xl"></div>
               <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-purple-100/30 to-blue-100/30 rounded-full blur-xl"></div>
-              
+
               <input
                 type="file"
                 onChange={handleFileSelect}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
                 disabled={isProcessing || uploadSuccess}
               />
-              
+
               {uploadSuccess ? (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -229,7 +223,7 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
                       <div className="absolute inset-0 rounded-full border-2 border-dashed border-blue-300/30 group-hover:border-blue-400/50 transition-colors duration-300"></div>
                     )}
                   </div>
-                  
+
                   <div className="text-center mb-8">
                     <h3 className="text-3xl font-bold mb-6">
                       <span className="bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
@@ -237,7 +231,7 @@ const DataUploadOnboarding: React.FC<DataUploadOnboardingProps> = ({ onComplete 
                       </span>
                     </h3>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-gray-500">
                     <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                     <p className="text-sm font-medium">Or click anywhere in this area to browse files</p>

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -249,8 +249,8 @@ const initialEdges: Edge[] = [
     source: 'patients-dataset',
     target: 'encounters-dataset',
     type: 'custom',
-    data: { 
-      label: 'has', 
+    data: {
+      label: 'has',
       relationship: 'one-to-many',
       transformationBlocks: [
         {
@@ -291,8 +291,8 @@ const initialEdges: Edge[] = [
     source: 'age-range-filter',
     target: 'patients-dataset',
     type: 'custom',
-    data: { 
-      label: 'filters', 
+    data: {
+      label: 'filters',
       relationship: 'many-to-one',
       transformationBlocks: [
         {
@@ -327,8 +327,8 @@ const initialEdges: Edge[] = [
     source: 'patients-dataset',
     target: 'count-patients',
     type: 'custom',
-    data: { 
-      label: 'queries', 
+    data: {
+      label: 'queries',
       relationship: 'one-to-one',
       transformationBlocks: [
         {
@@ -362,8 +362,8 @@ const initialEdges: Edge[] = [
     source: 'count-patients',
     target: 'bar-chart',
     type: 'custom',
-    data: { 
-      label: 'visualizes', 
+    data: {
+      label: 'visualizes',
       relationship: 'one-to-one',
       transformationBlocks: [
         {
@@ -457,10 +457,7 @@ const ReactFlowWrapper: React.FC = () => {
   const reactFlowInstance = useReactFlow();
 
   const {
-    selectedNodeId,
-    selectedEdgeId,
     setSelectedNode,
-    setSelectedEdge,
     addInsight,
     minimizedNodes,
     maximizeNode,
@@ -474,7 +471,7 @@ const ReactFlowWrapper: React.FC = () => {
   // Apply layout to initial data and combine with store nodes
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
     console.log('📐 Layout calculation memoization recalculated');
-    
+
     // Combine initial nodes with store nodes
     const allNodes = storeNodes.length > 0 ? [
       ...initialNodes,
@@ -485,12 +482,12 @@ const ReactFlowWrapper: React.FC = () => {
         data: storeNode.data
       }))
     ] : initialNodes;
-    
+
     // Remove duplicates by id
-    const uniqueNodes = allNodes.filter((node, index, self) => 
+    const uniqueNodes = allNodes.filter((node, index, self) =>
       index === self.findIndex(n => n.id === node.id)
     );
-    
+
     return getLayoutedElements(uniqueNodes, initialEdges);
   }, [storeNodes]);
 
@@ -505,7 +502,7 @@ const ReactFlowWrapper: React.FC = () => {
         try {
           // Select the node
           setSelectedNode(focusTargetNodeId);
-          
+
           // Check if the node exists in the current nodes
           const targetNode = nodes.find(n => n.id === focusTargetNodeId);
           if (targetNode) {
@@ -517,7 +514,7 @@ const ReactFlowWrapper: React.FC = () => {
               minZoom: 0.8,
               maxZoom: 1.2,
             });
-            
+
             console.log(`🎯 Auto-focused on node: ${focusTargetNodeId}`);
           } else {
             console.warn(`⚠️ Target node ${focusTargetNodeId} not found in current nodes`);
@@ -529,7 +526,7 @@ const ReactFlowWrapper: React.FC = () => {
           setFocusTargetNode(null);
         }
       }, 500); // Increased delay to ensure node is fully rendered
-      
+
       return () => clearTimeout(timer);
     }
   }, [focusTargetNodeId, reactFlowInstance, setSelectedNode, setFocusTargetNode, nodes]);
@@ -579,10 +576,10 @@ const ReactFlowWrapper: React.FC = () => {
   }, [storeNodes.length, layoutedNodes, setStoreNodes]);
 
   // Force re-render when store nodes change (for nodes added from Explorer)
-  const [renderKey, setRenderKey] = React.useState(0);
-  useEffect(() => {
-    setRenderKey(prev => prev + 1);
-  }, [storeNodes.length]);
+  // const [renderKey, setRenderKey] = React.useState(0);
+  // useEffect(() => {
+  //   setRenderKey(prev => prev + 1);
+  // }, [storeNodes.length]);
 
   // Update store when local nodes change (position updates, etc.)
   useEffect(() => {
@@ -622,10 +619,10 @@ const ReactFlowWrapper: React.FC = () => {
         if (node.id === targetNodeId) {
           const existingCombined = (node.data.combinedBlocks as any[]) || [];
           const updatedCombinedBlocks = [...existingCombined, newBlock];
-          
+
           // Check if this is an agent node
           const isAgentNode = node.data.isAgent;
-          const baseLabel = isAgentNode 
+          const baseLabel = isAgentNode
             ? String(node.data.label || '').replace(' Agent', '')
             : String(node.data.label || '');
 
@@ -634,7 +631,7 @@ const ReactFlowWrapper: React.FC = () => {
             data: {
               ...node.data,
               combinedBlocks: updatedCombinedBlocks,
-              label: isAgentNode 
+              label: isAgentNode
                 ? `${baseLabel} Agent` // Keep agent designation
                 : `${baseLabel} + ${newBlock.name}`, // Original behavior for non-agents
               description: `${node.data.description} | Processing: ${newBlock.description}`,
@@ -727,13 +724,13 @@ const ReactFlowWrapper: React.FC = () => {
     const handleEdgeConfigureEvent = (event: CustomEvent) => {
       console.log('⚙️ Edge configuration event:', event.detail);
       const { edgeId, blockData } = event.detail;
-      
+
       // Add insight about edge configuration
       addInsight({
         content: `Configured edge ${edgeId} with ${blockData.name}. This adds transformation logic to the data flow between nodes.`,
         edgeId: edgeId
       });
-      
+
       // Here you could update edge data, show a configuration modal, etc.
       // For now, we'll just log and add an insight
       console.log(`Edge ${edgeId} configured with block:`, blockData);

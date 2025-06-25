@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  CheckCircle, 
-  ArrowRight,
+import {
   Sparkles,
   RefreshCw
 } from 'lucide-react';
@@ -11,7 +9,7 @@ interface DataInsightsSummaryProps {
   onContinue: () => void;
 }
 
-export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ onContinue }) => {
+export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentVariant, setCurrentVariant] = useState(0);
 
@@ -50,10 +48,10 @@ export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ onCont
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Cycle to next variant
     setCurrentVariant((prev) => (prev + 1) % insightVariants.length);
     setIsRefreshing(false);
@@ -79,7 +77,7 @@ export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ onCont
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100 to-transparent transform -skew-y-6"></div>
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-purple-100 to-transparent transform skew-y-6"></div>
       </div>
-      
+
       <div className="relative z-10 px-8">
         <div className="w-full max-w-6xl mx-auto">
           <motion.div
@@ -113,8 +111,8 @@ export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ onCont
                     disabled={isRefreshing}
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <RefreshCw 
-                      size={16} 
+                    <RefreshCw
+                      size={16}
                       className={`${isRefreshing ? 'animate-spin' : ''}`}
                     />
                     <span>{isRefreshing ? 'Refreshing...' : 'New Insights'}</span>
@@ -135,24 +133,24 @@ export const DataInsightsSummary: React.FC<DataInsightsSummaryProps> = ({ onCont
                   {/* Text Content */}
                   <div className="space-y-4 text-gray-700 leading-relaxed">
                     <p>
-                      Your healthcare portfolio contains <strong className="text-blue-600">{insights.totalClaims.toLocaleString()} claims</strong> from {insights.insurer} 
+                      Your healthcare portfolio contains <strong className="text-blue-600">{insights.totalClaims.toLocaleString()} claims</strong> from {insights.insurer}
                       spanning the 2024 period, representing a comprehensive view of your healthcare journey.
                     </p>
-                    
+
                     <p>
-                      Total healthcare expenditure reaches <strong className="text-green-600">{formatCurrency(totalCosts)}</strong>, with treatment 
-                      costs accounting for the majority. Your claims maintain a strong <strong className="text-purple-600">{approvalRate}% approval rate</strong>, 
+                      Total healthcare expenditure reaches <strong className="text-green-600">{formatCurrency(totalCosts)}</strong>, with treatment
+                      costs accounting for the majority. Your claims maintain a strong <strong className="text-purple-600">{approvalRate}% approval rate</strong>,
                       indicating good alignment with coverage policies.
                     </p>
-                    
+
                     <p>
-                      The data reveals patterns across key health areas: <strong className="text-orange-600">{insights.topDiagnoses.slice(0, 2).join(', ')}</strong> 
+                      The data reveals patterns across key health areas: <strong className="text-orange-600">{insights.topDiagnoses.slice(0, 2).join(', ')}</strong>
                       appear most frequently, followed by {insights.topDiagnoses.slice(2).join(' and ')}.
                     </p>
-                    
+
                     <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
                       <p className="text-blue-800 font-medium text-sm">
-                        <strong>Key insight:</strong> {insights.keyInsight}. Dive into cost trends, provider comparisons, seasonal patterns, 
+                        <strong>Key insight:</strong> {insights.keyInsight}. Dive into cost trends, provider comparisons, seasonal patterns,
                         and personalized recommendations based on your healthcare data.
                       </p>
                     </div>

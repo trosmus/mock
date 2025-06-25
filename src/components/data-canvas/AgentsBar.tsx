@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, PanelRight, Bot, Brain, Search, Calculator, FileText, BarChart3, Database, Zap, TrendingUp, Users, DollarSign, Target, AlertTriangle, Lightbulb, MessageSquare, PieChart, Settings, Cpu } from 'lucide-react';
+import { ChevronRight, Bot, Brain, Search, Calculator, FileText, BarChart3, Database, Zap } from 'lucide-react';
 
 interface Agent {
   id: string;
@@ -25,34 +25,34 @@ const agentCategories: AgentCategory[] = [
     icon: <Bot className="w-4 h-4" />,
     tier: 'basic',
     agents: [
-      { 
-        id: 'data-explorer', 
-        name: 'Data Explorer', 
-        description: 'Automatically finds interesting patterns in your data', 
+      {
+        id: 'data-explorer',
+        name: 'Data Explorer',
+        description: 'Automatically finds interesting patterns in your data',
         prompt: 'I explore your data to discover patterns, trends, and insights. I show you what\'s working, what\'s not, and create easy-to-read summaries perfect for getting started with any dataset.',
         type: 'analysis',
         category: 'dataset'
       },
-      { 
-        id: 'ask-your-data', 
-        name: 'Ask Your Data', 
-        description: 'Just type questions in plain English', 
+      {
+        id: 'ask-your-data',
+        name: 'Ask Your Data',
+        description: 'Just type questions in plain English',
         prompt: 'I answer your business questions in plain English. Ask me "How are we doing this quarter?" or "What are our top products?" and I\'ll give you instant answers without any complicated formulas.',
         type: 'query',
         category: 'narrative'
       },
-      { 
-        id: 'chart-maker', 
-        name: 'Chart Maker', 
-        description: 'Picks the perfect chart for your information', 
+      {
+        id: 'chart-maker',
+        name: 'Chart Maker',
+        description: 'Picks the perfect chart for your information',
         prompt: 'I create beautiful visualizations for your data. I automatically pick the best chart type, make professional-looking graphs, and help you build dashboards that make your data look great.',
         type: 'visualization',
         category: 'visualization'
       },
-      { 
-        id: 'report-writer', 
-        name: 'Report Writer', 
-        description: 'Creates polished business reports for you', 
+      {
+        id: 'report-writer',
+        name: 'Report Writer',
+        description: 'Creates polished business reports for you',
         prompt: 'I write professional business reports in clear language. I create summaries, schedule automatic reports, and make you look like a data expert without any technical knowledge required.',
         type: 'reporting',
         category: 'narrative'
@@ -65,50 +65,50 @@ const agentCategories: AgentCategory[] = [
     icon: <Brain className="w-4 h-4" />,
     tier: 'advanced',
     agents: [
-      { 
-        id: 'predictive-analytics', 
-        name: 'Predictive Analytics Agent', 
-        description: 'Machine learning model building and forecasting', 
+      {
+        id: 'predictive-analytics',
+        name: 'Predictive Analytics Agent',
+        description: 'Machine learning model building and forecasting',
         prompt: 'I build sophisticated predictive models using machine learning. I can forecast trends, predict customer behavior, identify risks, and run complex what-if scenarios for strategic planning.',
         type: 'prediction',
         category: 'workflow'
       },
-      { 
-        id: 'data-integration', 
-        name: 'Data Integration Agent', 
-        description: 'Multi-source data connections and ETL pipelines', 
+      {
+        id: 'data-integration',
+        name: 'Data Integration Agent',
+        description: 'Multi-source data connections and ETL pipelines',
         prompt: 'I connect and harmonize data from multiple sources. I handle complex ETL processes, API integrations, real-time data streaming, and ensure your data is clean and ready for analysis.',
         type: 'integration',
         category: 'dataset'
       },
-      { 
-        id: 'performance-monitor', 
-        name: 'Performance Monitor Agent', 
-        description: 'Advanced KPI tracking and anomaly detection', 
+      {
+        id: 'performance-monitor',
+        name: 'Performance Monitor Agent',
+        description: 'Advanced KPI tracking and anomaly detection',
         prompt: 'I continuously monitor your business performance with advanced analytics. I track complex KPIs, detect anomalies using statistical algorithms, and provide real-time alerts for critical metrics.',
         type: 'monitoring',
         category: 'workflow'
       },
-      { 
-        id: 'collaboration-agent', 
-        name: 'Collaboration Agent', 
-        description: 'Team-based analytics and workflow management', 
+      {
+        id: 'collaboration-agent',
+        name: 'Collaboration Agent',
+        description: 'Team-based analytics and workflow management',
         prompt: 'I facilitate advanced team collaboration on data projects. I manage workflows, version control, team permissions, and enterprise governance for complex analytics initiatives.',
         type: 'collaboration',
         category: 'workflow'
       },
-      { 
-        id: 'ml-studio', 
-        name: 'Machine Learning Studio', 
-        description: 'Advanced ML model development and deployment', 
+      {
+        id: 'ml-studio',
+        name: 'Machine Learning Studio',
+        description: 'Advanced ML model development and deployment',
         prompt: 'I provide a complete machine learning development environment. I help you build, train, validate, and deploy custom ML models with advanced algorithms and automated model optimization.',
         type: 'ml-development',
         category: 'workflow'
       },
-      { 
-        id: 'custom-analytics', 
-        name: 'Custom Analytics Builder', 
-        description: 'Build custom analytical workflows and algorithms', 
+      {
+        id: 'custom-analytics',
+        name: 'Custom Analytics Builder',
+        description: 'Build custom analytical workflows and algorithms',
         prompt: 'I help you create custom analytical solutions tailored to your specific business needs. I build custom algorithms, specialized metrics, and unique analytical workflows that standard tools can\'t provide.',
         type: 'custom-development',
         category: 'workflow'
@@ -190,10 +190,6 @@ const getAgentFileConfig = (category: string) => {
 const AgentsBar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   const toggleCategory = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -358,16 +354,16 @@ const AgentsBar: React.FC = () => {
                                 right: '-2px',
                                 width: '20px',
                                 height: '20px',
-                                background: category.tier === 'basic' 
-                                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                                background: category.tier === 'basic'
+                                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                                   : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                 borderRadius: '50%',
                                 border: '2px solid white',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                boxShadow: category.tier === 'basic' 
-                                  ? '0 2px 6px rgba(16, 185, 129, 0.3)' 
+                                boxShadow: category.tier === 'basic'
+                                  ? '0 2px 6px rgba(16, 185, 129, 0.3)'
                                   : '0 2px 6px rgba(239, 68, 68, 0.3)',
                               }}
                             >
@@ -431,4 +427,4 @@ const AgentsBar: React.FC = () => {
   );
 };
 
-export default AgentsBar; 
+export default AgentsBar;
