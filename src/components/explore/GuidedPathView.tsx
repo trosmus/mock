@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Route, 
-  Clock, 
-  BarChart3, 
-  TrendingUp, 
+import {
+  ArrowLeft,
+  Route,
+  Clock,
+  BarChart3,
+  TrendingUp,
   FileText,
   Users,
   ChevronRight,
@@ -75,7 +75,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                 <Monitor size={16} />
                 Add to Desktop
               </button>
-              <div 
+              <div
                 className="px-3 py-1 rounded-full text-xs font-medium text-white"
                 style={{ backgroundColor: selectedPath.color }}
               >
@@ -126,17 +126,17 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                       {!isLast && (
                         <div className="absolute left-6 top-20 w-0.5 h-8 bg-gradient-to-b from-blue-300 to-blue-200" />
                       )}
-                      
+
                       {/* Flow arrow */}
                       {!isLast && (
                         <div className="absolute left-5 top-24 w-2 h-2 transform rotate-45 bg-blue-300" />
                       )}
-                      
+
                       {/* Step card */}
                       <div className="flex gap-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300">
                         {/* Step indicator */}
                         <div className="flex-shrink-0">
-                          <div 
+                          <div
                             className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
                             style={{ backgroundColor: selectedPath?.color || getNodeColor(step.type) }}
                           >
@@ -146,7 +146,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                             <span className="text-xs font-medium text-gray-500">
                               Step {index + 1}
                             </span>
-                            <div 
+                            <div
                               className="mt-1 text-xs px-2 py-1 rounded-full text-white font-medium"
                               style={{ backgroundColor: getNodeColor(step.type) }}
                             >
@@ -154,7 +154,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-3">
@@ -164,7 +164,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                               ~{Math.floor(Math.random() * 5) + 2} min
                             </div>
                           </div>
-                          
+
                           {step.description && (
                             <p className="text-gray-600 mb-4">{step.description}</p>
                           )}
@@ -177,15 +177,15 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                             </h4>
                             <div className="grid grid-cols-2 gap-3">
                               {/* Selected route */}
-                              <div 
+                              <div
                                 className="p-3 rounded-lg border-2 bg-blue-50"
-                                style={{ 
+                                style={{
                                   borderColor: selectedPath?.color || '#3b82f6',
                                   backgroundColor: `${selectedPath?.color || '#3b82f6'}10`
                                 }}
                               >
                                 <div className="flex items-center gap-2 mb-1">
-                                  <div 
+                                  <div
                                     className="w-3 h-3 rounded-full"
                                     style={{ backgroundColor: selectedPath?.color || '#3b82f6' }}
                                   />
@@ -196,7 +196,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
 
                               {/* Alternative routes */}
                               {getAlternativesForStep(index, step).map((alt, altIndex) => (
-                                <div 
+                                <div
                                   key={altIndex}
                                   className="p-3 rounded-lg border border-gray-200 bg-gray-50"
                                 >
@@ -242,7 +242,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                             {guidedStepVisualizations[index] && (
                               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <h5 className="font-semibold text-gray-900 mb-3">{guidedStepVisualizations[index].title}</h5>
-                                
+
                                 {guidedStepVisualizations[index].type === 'text' && (
                                   <div className="text-sm text-gray-700 whitespace-pre-line">
                                     {guidedStepVisualizations[index].content}
@@ -257,9 +257,9 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                                         <div key={i} className="flex items-center gap-3">
                                           <div className="w-20 text-xs text-gray-600">{label}</div>
                                           <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
-                                            <div 
+                                            <div
                                               className="h-4 rounded-full flex items-center justify-end pr-2"
-                                              style={{ 
+                                              style={{
                                                 width: `${(guidedStepVisualizations[index].data.values[i] / Math.max(...guidedStepVisualizations[index].data.values)) * 100}%`,
                                                 backgroundColor: guidedStepVisualizations[index].data.colors[i]
                                               }}
@@ -287,7 +287,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                                           <div className="flex items-center gap-2 mt-1">
                                             <div className="text-xs text-gray-500">Confidence:</div>
                                             <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                              <div 
+                                              <div
                                                 className="h-2 bg-green-500 rounded-full"
                                                 style={{ width: `${insight.confidence}%` }}
                                               />
@@ -302,22 +302,22 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                               </div>
                             )}
                           </div>
-                          
-                          {step.insight && (
-                            <div 
-                              className="border-l-4 pl-4 py-2 mb-4"
-                              style={{ 
-                                borderColor: selectedPath?.color || getNodeColor(step.type),
-                                backgroundColor: `${selectedPath?.color || getNodeColor(step.type)}10`
-                              }}
-                            >
-                              <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-2">
-                                <TrendingUp size={16} />
-                                Key Insight
-                              </h4>
-                              <p className="text-gray-800 text-sm">{step.insight}</p>
-                            </div>
-                          )}
+
+                          {/*{step.insight && (*/}
+                          {/*  <div */}
+                          {/*    className="border-l-4 pl-4 py-2 mb-4"*/}
+                          {/*    style={{ */}
+                          {/*      borderColor: selectedPath?.color || getNodeColor(step.type),*/}
+                          {/*      backgroundColor: `${selectedPath?.color || getNodeColor(step.type)}10`*/}
+                          {/*    }}*/}
+                          {/*  >*/}
+                          {/*    <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-2">*/}
+                          {/*      <TrendingUp size={16} />*/}
+                          {/*      Key Insight*/}
+                          {/*    </h4>*/}
+                          {/*    <p className="text-gray-800 text-sm">{step.insight}</p>*/}
+                          {/*  </div>*/}
+                          {/*)}*/}
                         </div>
                       </div>
                     </motion.div>
@@ -339,7 +339,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                     <div className="absolute left-5 -top-4 w-2 h-2 transform rotate-45 bg-green-300" />
                   </>
                 )}
-                
+
                 <div className="flex gap-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-lg border-2 border-green-400 p-6">
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3 bg-green-600">
@@ -349,7 +349,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                       <span className="text-xs font-medium text-gray-500">Final</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Exploration Complete</h3>
                     <p className="text-gray-600 mb-4">
@@ -370,7 +370,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                   {/* Connection line */}
                   <div className="absolute left-6 -top-8 w-0.5 h-8 bg-gradient-to-b from-green-300 to-purple-300" />
                   <div className="absolute left-5 -top-4 w-2 h-2 transform rotate-45 bg-purple-300" />
-                  
+
                   <div className="bg-white rounded-xl shadow-xl border-2 border-purple-400 overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
@@ -380,7 +380,7 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
                         </div>
                         <div>
                           <h3 className="text-xl font-bold">
-                            {selectedPath?.id === 'medication-patterns' 
+                            {selectedPath?.id === 'medication-patterns'
                               ? 'Business Process & Operations Analysis Report'
                               : 'Customer Demographics & Usage Analysis Report'
                             }
@@ -518,4 +518,4 @@ const GuidedPathView: React.FC<GuidedPathViewProps> = ({
   );
 };
 
-export default GuidedPathView; 
+export default GuidedPathView;

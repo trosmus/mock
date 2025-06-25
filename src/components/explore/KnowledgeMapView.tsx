@@ -76,7 +76,23 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
         container: containerRef.current,
         elements: [...nodes, ...edges],
         style: cytoscapeStyles,
-        layout: cytoscapeLayout
+        layout: cytoscapeLayout,
+        
+        // User interaction settings
+        userZoomingEnabled: true,
+        userPanningEnabled: true,
+        boxSelectionEnabled: false,
+        selectionType: 'single',
+        touchTapThreshold: 8,
+        desktopTapThreshold: 4,
+        autolock: false,
+        autoungrabify: false,
+        autounselectify: false,
+        
+        // Zoom settings
+        minZoom: 0.1,
+        maxZoom: 3.0,
+        wheelSensitivity: 0.1
       });
 
       // Node click handler with alternative visibility and path highlighting
@@ -399,61 +415,6 @@ const KnowledgeMapView: React.FC<KnowledgeMapViewProps> = ({
             title="Reset View"
           >
             <RotateCcw size={16} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Guided paths quick access */}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 p-4 max-w-xs">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Route size={16} className="text-blue-600" />
-            Available Paths
-          </h3>
-          <div className="space-y-2">
-            {explorationPaths.map((path) => {
-              const Icon = path.icon;
-              return (
-                <div
-                  key={path.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <button
-                    onClick={() => onSelectPath(path)}
-                    className="flex-1 flex items-center gap-3 text-left"
-                  >
-                    <div 
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: path.color }}
-                    >
-                      <Icon size={14} className="text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {path.title}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {path.steps.length} steps
-                      </p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddPathToDesktop(path);
-                    }}
-                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-all duration-200 flex-shrink-0"
-                    title="Add this path to desktop"
-                  >
-                    <Monitor size={14} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          <button
-            onClick={onShowPaths}
-            className="w-full mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            View all analysis paths →
           </button>
         </div>
 

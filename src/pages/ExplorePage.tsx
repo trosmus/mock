@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Import components
+import DataUploadOnboarding from '../components/DataUploadOnboarding.tsx';
 import PathsListView from '../components/explore/PathsListView';
 import GuidedPathView from '../components/explore/GuidedPathView';
 import PathBuilderView from '../components/explore/PathBuilderView';
@@ -18,6 +19,7 @@ import {
 
 // Import canvas store for adding nodes
 import { useCanvasStore } from '../state/canvasStore';
+import { useAppStore } from '../stores/useAppStore';
 
 interface ExplorePageProps {}
 
@@ -25,6 +27,16 @@ const ExplorePage: React.FC<ExplorePageProps> = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { addNode } = useCanvasStore();
+  const { datasets } = useAppStore();
+  
+  // Check if user has uploaded data (using localStorage to persist across sessions)
+  const [hasUploadedData, setHasUploadedData] = useState<boolean>(() => {
+    // For testing: always show onboarding
+    return false;
+    // return localStorage.getItem('hasUploadedData') === 'true' || datasets.length > 0;
+  });
+
+  // Existing explore page states
   const [viewMode, setViewMode] = useState<'map' | 'paths' | 'path' | 'builder'>('paths');
   const [explorationPath, setExplorationPath] = useState<any[]>([]);
   const [selectedPath, setSelectedPath] = useState<typeof explorationPaths[0] | null>(null);
@@ -40,9 +52,13 @@ const ExplorePage: React.FC<ExplorePageProps> = () => {
   const [guidedFinalAnalysis, setGuidedFinalAnalysis] = useState<any>(null);
   const [pathToHighlight, setPathToHighlight] = useState<typeof explorationPaths[0] | null>(null);
 
+  const handleOnboardingComplete = () => {
+    setHasUploadedData(true);
+  };
+
   // Reset to paths view when navigating to explore page
   useEffect(() => {
-    // Always reset to the default paths view when the component mounts or location changes
+    if (hasUploadedData) {
     setViewMode('paths');
     setSelectedPath(null);
     setExplorationPath([]);
@@ -54,7 +70,13 @@ const ExplorePage: React.FC<ExplorePageProps> = () => {
     setCurrentBuilderStep(0);
     setBuilderChoices([]);
     setSelectedNodeId(null);
-  }, [location.pathname]);
+    }
+  }, [location.pathname, hasUploadedData]);
+
+  // Show data upload onboarding if no data has been uploaded
+  if (!hasUploadedData) {
+    return <DataUploadOnboarding onComplete={handleOnboardingComplete} />;
+  }
 
   // Navigation handlers
   const handleBackToPaths = () => {
@@ -326,7 +348,7 @@ const ExplorePage: React.FC<ExplorePageProps> = () => {
   }
 
   if (viewMode === 'builder') {
-                    return (
+    return (
       <PathBuilderView
         currentBuilderStep={currentBuilderStep}
         builderChoices={builderChoices}
@@ -346,7 +368,7 @@ const ExplorePage: React.FC<ExplorePageProps> = () => {
   }
 
   if (viewMode === 'map') {
-  return (
+    return (
       <KnowledgeMapView
         explorationPaths={explorationPaths}
         explorationPath={explorationPath}
